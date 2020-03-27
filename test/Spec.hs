@@ -1,5 +1,5 @@
-module Main (main) where
-
+import Test.Hspec (hspec)
+import Test.Servant.Docs.Simple (docSpec)
 
 main :: IO ()
-main = putStrLn ("Test suite is not implemented" :: String)
+main = hspec docSpec

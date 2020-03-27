@@ -24,7 +24,10 @@ source-repository head
 
 common common-options
   build-depends:       base >= 4.11.1.0 && < 4.14
-  
+                     , prettyprinter
+                     , servant
+                     , text
+
   ghc-options:         -Wall
                        -Wcompat
                        -Widentities
@@ -56,14 +59,17 @@ common common-options
 library
   import:              common-options
   hs-source-dirs:      src
-  exposed-modules:     ServantDocsSimple
+  exposed-modules:     Servant.Docs.Simple
 
 test-suite servant-docs-simple-test
   import:              common-options
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
+
   build-depends:       servant-docs-simple
+                     , hspec
+
   ghc-options:         -threaded
                        -rtsopts
                        -with-rtsopts=-N
