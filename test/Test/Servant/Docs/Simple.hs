@@ -1,111 +1,92 @@
 -- | Unit tests for generating documentation of api
 
-module Test.Servant.Docs.Simple (docSpec) where
+module Test.Servant.Docs.Simple (docSpec, collateSpec) where
 
-import Data.Foldable (fold)
-import Data.List (intersperse)
-import Data.Text (Text, pack, stripSuffix)
-import Servant.API ((:<|>), (:>), AuthProtect, Capture, Header, Post, QueryParam, ReqBody)
+import Test.Hspec (Spec, describe, it, shouldBe)
+import Test.Servant.Docs.Simple.Samples
+
+import Data.Text (pack)
+import Servant.API ((:<|>), (:>))
 import Servant.API.TypeLevel (Endpoints)
 import Servant.Docs.Simple (collate, documentEndpoint)
-import Test.Hspec (Spec, describe, it, shouldBe)
 
 docSpec :: Spec
-docSpec = describe "Generating Documentation" $ do
+docSpec = describe "Generates API Documentation for a single endpoint" $ do
     it "Generates static route fragment" $
         stripResponse (documentEndpoint @(StaticRouteTest :> ResponseTest))
         `shouldBe` Just staticRouteExpected
+
     it "Generates dynamic route doc fragment" $
         stripResponse (documentEndpoint @(DynRouteTest :> ResponseTest))
         `shouldBe` Just dynRouteExpected
+
+    it "Generates HttpVersion fragment" $
+       stripResponse (documentEndpoint @(HttpVersionTest :> ResponseTest))
+       `shouldBe` Just httpVersionExpected
+
+    it "Generates IsSecure fragment" $
+        stripResponse (documentEndpoint @(IsSecureTest :> ResponseTest))
+        `shouldBe` Just isSecureExpected
+
+    it "Generates RemoteHost fragment" $
+        stripResponse (documentEndpoint @(RemoteHostTest :> ResponseTest))
+        `shouldBe` Just remoteHostExpected
+
+    it "Generates Description fragment" $
+        stripResponse (documentEndpoint @(DescriptionTest :> ResponseTest))
+        `shouldBe` Just descriptionExpected
+
+    it "Generates Summary fragment" $
+        stripResponse (documentEndpoint @(SummaryTest :> ResponseTest))
+        `shouldBe` Just summaryExpected
+
+    it "Generates Vault fragment" $
+        stripResponse (documentEndpoint @(VaultTest :> ResponseTest))
+        `shouldBe` Just vaultExpected
+
+    it "Generates BasicAuth fragment" $
+        stripResponse (documentEndpoint @(BasicAuthTest :> ResponseTest))
+        `shouldBe` Just basicAuthExpected
+
     it "Generates Authentication doc fragment" $
         stripResponse (documentEndpoint @(AuthTest :> ResponseTest))
         `shouldBe` Just authExpected
+
     it "Generates Header fragment" $
         stripResponse (documentEndpoint @(HeaderTest :> ResponseTest))
         `shouldBe` Just headerExpected
+
+    it "Generates QueryFlag fragment" $
+        stripResponse (documentEndpoint @(QueryFlagTest :> ResponseTest))
+        `shouldBe` Just queryFlagExpected
+
     it "Generates Query param fragment" $
         stripResponse (documentEndpoint @(QueryParamTest :> ResponseTest))
         `shouldBe` Just queryParamExpected
+
+    it "Generates QueryParams fragment" $
+        stripResponse (documentEndpoint @(QueryParamsTest :> ResponseTest))
+        `shouldBe` Just queryParamsExpected
+
     it "Generates Request body fragment" $
         stripResponse (documentEndpoint @(ReqBodyTest :> ResponseTest))
         `shouldBe` Just reqBodyExpected
+
+    it "Generates StreamBody fragment" $
+        stripResponse (documentEndpoint @(StreamBodyTest :> ResponseTest))
+        `shouldBe` Just streamBodyExpected
+
     it "Generates Response fragment" $
         responseSuffix
         `shouldBe` responseExpected
+
     it "Documents entire api route" $
         (pack . show) (documentEndpoint @ApiRoute)
         `shouldBe` apiRouteExpected
+
+collateSpec :: Spec
+collateSpec = describe "Collates API documentation" $ do
     it "Collates api routes" $
         (pack . show) (collate @(Endpoints (ApiRoute :<|> ApiRoute)))
         `shouldBe` apiCollatedExpected
-    where stripResponse = stripSuffix ("\n" <> responseSuffix) . pack . show
 
-type StaticRouteTest = "test_route"
-staticRouteExpected :: Text
-staticRouteExpected = "/test_route"
-
-type DynRouteTest = Capture "test" ()
-dynRouteExpected :: Text
-dynRouteExpected = "/{test::()}"
-
-type AuthTest = AuthProtect "TEST_JWT"
-authExpected :: Text
-authExpected = "Authentication: TEST_JWT"
-
-type HeaderTest = Header "test" ()
-headerExpected :: Text
-headerExpected = vcat [ "RequestHeaders:"
-                      , "  Name: test"
-                      , "  ContentType: ()"
-                      ]
-
-type QueryParamTest = QueryParam "test" ()
-queryParamExpected :: Text
-queryParamExpected = vcat [ "QueryParam:"
-                          , "  Param: test"
-                          , "  ContentType: ()"
-                          ]
-
-type ReqBodyTest = ReqBody '[()] ()
-reqBodyExpected :: Text
-reqBodyExpected = vcat [ "RequestBody:"
-                       , "  Format: ': * () ('[] *)"
-                       , "  ContentType: ()"
-                       ]
-
-type ResponseTest = Post '[()] ()
-responseExpected :: Text
-responseExpected = vcat [ "RequestType: 'POST"
-                        , "Response:"
-                        , "  Format: ': * () ('[] *)"
-                        , "  ContentType: ()"
-                        ]
-
-type ApiRoute = StaticRouteTest
-             :> AuthTest
-             :> DynRouteTest
-             :> HeaderTest
-             :> ReqBodyTest
-             :> ResponseTest
-
-apiRouteExpected :: Text
-apiRouteExpected = vcat [ staticRouteExpected <> dynRouteExpected
-                        , authExpected
-                        , headerExpected
-                        , reqBodyExpected
-                        , responseExpected
-                        ]
-
-apiCollatedExpected :: Text
-apiCollatedExpected = vcat [ apiRouteExpected <> "\n\n"
-                           , apiRouteExpected <> "\n\n"
-                           ]
-
--- Helpers --
-
-responseSuffix :: Text
-responseSuffix = pack $ show $ documentEndpoint @ResponseTest
-
-vcat :: [Text] -> Text
-vcat = fold . intersperse ("\n" :: Text)

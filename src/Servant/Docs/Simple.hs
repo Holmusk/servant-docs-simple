@@ -18,7 +18,6 @@ Example:
 
 --}
 
-
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DataKinds           #-}
 {-# LANGUAGE FlexibleInstances   #-}
@@ -28,15 +27,16 @@ Example:
 {-# LANGUAGE TypeApplications    #-}
 {-# LANGUAGE TypeOperators       #-}
 
-module Servant.Docs.Simple (HasCollatable, HasDocumentApi, collate, documentEndpoint) where
+module Servant.Docs.Simple (collate, documentEndpoint) where
 
 import Data.Proxy
 import Data.String (fromString)
 import Data.Text.Prettyprint.Doc (Doc, line, vcat)
 import Data.Typeable (Typeable, typeRep)
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
-import Servant.API ((:>), AuthProtect, Capture', Header', QueryFlag, QueryParam', QueryParams,
-                    ReqBody', Verb)
+import Servant.API ((:>), AuthProtect, BasicAuth, Capture', CaptureAll, Description, Header',
+                    HttpVersion, IsSecure, QueryFlag, QueryParam', QueryParams, RemoteHost,
+                    ReqBody', StreamBody', Summary, Vault, Verb)
 
 -- | Folds api endpoints into documentation
 class HasCollatable api where
@@ -68,59 +68,114 @@ class HasDocumentApi api where
 instance (HasDocumentApi b, KnownSymbol route) => HasDocumentApi ((route :: Symbol) :> b) where
     document r = document @b formatted
         where formatted = mconcat [r, "/", fragment]
-              fragment = symbolVal' $ Proxy @route
+              fragment = symbolVal' @route
 
--- | Dynamic route documentation
+-- | Capture documentation
 instance (HasDocumentApi b, KnownSymbol dRoute, Typeable t) => HasDocumentApi (Capture' m (dRoute :: Symbol) t :> b) where
     document r = document @b formatted
         where formatted = mconcat [r, "/", "{", var, "::", format, "}"]
-              var = symbolVal' $ Proxy @dRoute
-              format = typeText (Proxy @t)
+              var = symbolVal' @dRoute
+              format = typeText @t
+
+-- | CaptureAll documentation
+instance (HasDocumentApi b, KnownSymbol dRoute, Typeable t) => HasDocumentApi (CaptureAll (dRoute :: Symbol) t :> b) where
+    document r = document @b formatted
+        where formatted = mconcat [r, "/", "{", var, "::", format, "}"]
+              var = symbolVal' @dRoute
+              format = typeText @t
+
+-- | Request HttpVersion documentation
+instance HasDocumentApi b => HasDocumentApi (HttpVersion :> b) where
+    document r a = document @b r (vcat' [a, desc])
+        where desc = "Captures Http Version: True"
+
+-- | IsSecure documentation
+instance HasDocumentApi b => HasDocumentApi (IsSecure :> b) where
+    document r a = document @b r (vcat' [a, desc])
+        where desc = "SSL Only: True"
+
+-- | Request Remote host documentation
+instance HasDocumentApi b => HasDocumentApi (RemoteHost :> b) where
+    document r a = document @b r (vcat' [a, desc])
+        where desc = "Captures RemoteHost/IP: True"
+
+-- | Description documentation
+instance (HasDocumentApi b, KnownSymbol desc) => HasDocumentApi (Description (desc :: Symbol) :> b) where
+    document r a = document @b r (vcat' [a, desc])
+        where desc = "Description: " <> symbolVal' @desc
+
+-- | Summary documentation
+instance (HasDocumentApi b, KnownSymbol s) => HasDocumentApi (Summary (s :: Symbol) :> b) where
+    document r a = document @b r (vcat' [a, desc])
+        where desc = "Summary: " <> symbolVal' @s
+
+-- | Vault documentation
+instance HasDocumentApi b => HasDocumentApi (Vault :> b) where
+    document r a = document @b r (vcat' [a, desc])
+        where desc = "Vault: True"
+
+-- | Basic authentication documentation
+instance (HasDocumentApi b, KnownSymbol realm, Typeable a) => HasDocumentApi (BasicAuth (realm :: Symbol) a :> b) where
+    document r a = document @b r (vcat' [a, formatted])
+        where formatted = vcat' [ "Basic Authentication: "
+                                , "  Realm: " <> realm
+                                , "  UserData: " <> userData
+                                ]
+              realm = (symbolVal' @realm)
+              userData = typeText @a
 
 -- | Authentication documentation
 instance (HasDocumentApi b, KnownSymbol token) => HasDocumentApi (AuthProtect (token :: Symbol) :> b) where
     document r a = document @b r (vcat' [a, formatted])
         where formatted = "Authentication: " <> authDoc
-              authDoc = symbolVal' (Proxy @token)
+              authDoc = symbolVal' @token
 
 -- | Request header documentation
 instance (HasDocumentApi b, KnownSymbol ct, Typeable typ) => HasDocumentApi (Header' m (ct :: Symbol) typ :> b) where
     document r a = document @b r (vcat' [a, formatted])
         where formatted = vcat' [ "RequestHeaders:"
-                               , "  Name: " <>  (symbolVal' $ Proxy @ct)
-                               , "  ContentType: " <> typeText (Proxy @typ)
-                               ]
+                                , "  Name: " <>  (symbolVal' @ct)
+                                , "  ContentType: " <> typeText @typ
+                                ]
 
 -- | Query flag documentation
 instance (HasDocumentApi b, KnownSymbol param) => HasDocumentApi (QueryFlag (param :: Symbol) :> b) where
     document r a = document @b r (vcat' [a, formatted])
         where formatted = vcat' [ "QueryFlag:"
-                               , "  Param: " <>  (symbolVal' $ Proxy @param)
-                               ]
+                                , "  Param: " <>  (symbolVal' @param)
+                                ]
 
 -- | Query param documentation
 instance (HasDocumentApi b, KnownSymbol param, Typeable typ) => HasDocumentApi (QueryParam' m (param :: Symbol) typ :> b) where
     document r a = document @b r (vcat' [a, formatted])
         where formatted = vcat' [ "QueryParam:"
-                               , "  Param: " <>  (symbolVal' $ Proxy @param)
-                               , "  ContentType: " <> typeText (Proxy @typ)
-                               ]
+                                , "  Param: " <>  (symbolVal' @param)
+                                , "  ContentType: " <> typeText @typ
+                                ]
 
 -- | Query params documentation
 instance (HasDocumentApi b, KnownSymbol param, Typeable typ) => HasDocumentApi (QueryParams (param :: Symbol) typ :> b) where
     document r a = document @b r (vcat' [a, formatted])
         where formatted = vcat' [ "QueryParams:"
-                               , "  Param: " <>  (symbolVal' $ Proxy @param)
-                               , "  ContentType: " <> typeText (Proxy @typ)
-                               ]
+                                , "  Param: " <>  (symbolVal' @param)
+                                , "  ContentType: " <> typeText @typ
+                                ]
 
 -- | Request body documentation
 instance (HasDocumentApi b, Typeable ct, Typeable typ) => HasDocumentApi (ReqBody' m ct typ :> b) where
     document r a = document @b r (vcat' [a, formatted])
         where formatted = vcat' [ "RequestBody:"
-                               , "  Format: " <> typeText (Proxy @ct)
-                               , "  ContentType: " <> typeText (Proxy @typ)
-                               ]
+                                , "  Format: " <> typeText @ct
+                                , "  ContentType: " <> typeText @typ
+                                ]
+
+-- | Stream body documentation
+instance (HasDocumentApi b, Typeable ct, Typeable typ) => HasDocumentApi (StreamBody' m ct typ :> b) where
+    document r a = document @b r (vcat' [a, formatted])
+        where formatted = vcat' [ "StreamBody:"
+                                , "  Format: " <> typeText @ct
+                                , "  ContentType: " <> typeText @typ
+                                ]
 
 -- | Response documentation
 --   Terminates here as responses are last parts of api endpoints
@@ -128,20 +183,20 @@ instance (HasDocumentApi b, Typeable ct, Typeable typ) => HasDocumentApi (ReqBod
 instance (Typeable m, Typeable ct, Typeable typ) => HasDocumentApi (Verb m s ct typ) where
     document r a = vcat' [r, a, formatted]
         where formatted = vcat' [ requestType
-                               , response
-                               ]
-              requestType = "RequestType: " <> typeText (Proxy @m)
+                                , response
+                                ]
+              requestType = "RequestType: " <> typeText @m
               response = vcat' [ "Response:"
-                              , "  Format: " <> typeText (Proxy @ct)
-                              , "  ContentType: " <> typeText (Proxy @typ)
-                              ]
-              -- Remove empty parts of the documentation
+                               , "  Format: " <> typeText @ct
+                               , "  ContentType: " <> typeText @typ
+                               ]
 
-typeText :: forall a ann. (Typeable a) => Proxy a -> Doc ann
-typeText = fromString . show . typeRep
+-- | Internal Helper utilities
+typeText :: forall a ann. (Typeable a) => Doc ann
+typeText = fromString $ show $ typeRep $ Proxy @a
 
 vcat' :: [Doc ann] -> Doc ann
 vcat' = vcat . filter ((/= "") . show)
 
-symbolVal' :: KnownSymbol n => proxy n -> Doc ann
-symbolVal' = fromString . symbolVal
+symbolVal' :: forall n ann. KnownSymbol n => Doc ann
+symbolVal' = fromString $ symbolVal $ Proxy @n
