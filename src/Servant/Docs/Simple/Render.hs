@@ -27,10 +27,10 @@ import Data.List (intersperse)
 import Data.Text.Prettyprint.Doc (Doc, pretty, line, nest, vcat, cat)
 
 -- | Documentation format which we render to other formats
-data Endpoints = Endpoints [Node]
+data Endpoints = Endpoints [Node] deriving stock Eq
 
-data Details = Details [Node] | Detail Text
-data Node = Node Text Details
+data Details = Details [Node] | Detail Text deriving stock Eq
+data Node = Node Text Details deriving stock Eq
 
 class Renderable a where
   render :: Endpoints -> a

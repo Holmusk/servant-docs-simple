@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Servant.Docs.Simple.Parse (HasCollatable, HasDocumentApi, Details (..), Node (..), collate, documentEndpoint) where
+module Servant.Docs.Simple.Parse (HasParsable, HasDocumentApi, Details (..), Node (..), parse, documentEndpoint) where
 
 import Data.Proxy
 import Data.Text (Text, pack)
@@ -16,19 +16,19 @@ import qualified Servant.API.TypeLevel as S (Endpoints)
 import Servant.Docs.Simple.Render (Details(..), Endpoints(..), Node(..))
 
 -- | Folds api endpoints into documentation
-class HasCollatable api where
+class HasParsable api where
     -- | Folds list of endpoints to documentation
-    collate :: Endpoints
+    parse :: Endpoints
 
-instance (HasDocumentApi api, HasCollatable b) => HasCollatable (api ': b) where
-    collate = Endpoints $ documentEndpoint @api : previous
-      where Endpoints previous = collate @b
+instance (HasDocumentApi api, HasParsable b) => HasParsable (api ': b) where
+    parse = Endpoints $ documentEndpoint @api : previous
+      where Endpoints previous = parse @b
 
-instance HasCollatable '[] where
-    collate = Endpoints []
+instance HasParsable '[] where
+    parse = Endpoints []
 
-instance (HasCollatable (S.Endpoints a)) => HasCollatable a where
-    collate = collate @(S.Endpoints a)
+instance (HasParsable (S.Endpoints a)) => HasParsable a where
+    parse = parse @(S.Endpoints a)
 
 -- | Folds an api endpoint into documentation
 documentEndpoint :: forall a. HasDocumentApi a => Node

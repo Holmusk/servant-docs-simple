@@ -48,6 +48,7 @@ common common-options
   default-extensions:  AllowAmbiguousTypes
                        ConstraintKinds
                        DataKinds
+                       DerivingStrategies
                        FlexibleInstances
                        FunctionalDependencies
                        OverloadedStrings
@@ -61,9 +62,10 @@ common common-options
 library
   import:              common-options
   hs-source-dirs:      src
-  other-modules:       Servant.Docs.Simple.Parse
-                       Servant.Docs.Simple.Render
+
   exposed-modules:     Servant.Docs.Simple
+                       Servant.Docs.Simple.Parse
+                       Servant.Docs.Simple.Render
 
 test-suite servant-docs-simple-test
   import:              common-options
@@ -73,6 +75,7 @@ test-suite servant-docs-simple-test
 
   build-depends:       servant-docs-simple
                      , hspec
+                     , hspec-core
 
   other-modules:       Test.Servant.Docs.Simple
                        Test.Servant.Docs.Simple.Samples

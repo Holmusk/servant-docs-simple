@@ -11,6 +11,8 @@ import Servant.API ((:>), AuthProtect, BasicAuth, Capture, CaptureAll,
                     QueryParam, QueryParams, RemoteHost, ReqBody,
                     StreamBody, Summary, Vault)
 
+import Servant.Docs.Simple.Render (Endpoints(..), Details(..), Node(..), Renderable(..), Json(..), PlainText(..))
+
 type StaticRouteTest = "test_route"
 staticRouteExpected :: Text
 staticRouteExpected = "/test_route"
