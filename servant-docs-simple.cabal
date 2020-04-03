@@ -24,6 +24,7 @@ source-repository head
 
 common common-options
   build-depends:       base >= 4.11.1.0 && < 4.14
+                     , aeson
                      , prettyprinter
                      , servant
                      , text
@@ -44,21 +45,24 @@ common common-options
     ghc-options:       -Wmissing-deriving-strategies
 
   default-language:    Haskell2010
-  default-extensions:  ConstraintKinds
-                       OverloadedStrings
-                       AllowAmbiguousTypes
+  default-extensions:  AllowAmbiguousTypes
+                       ConstraintKinds
                        DataKinds
                        FlexibleInstances
+                       FunctionalDependencies
                        OverloadedStrings
+                       OverloadedStrings
+                       PolyKinds
                        ScopedTypeVariables
                        TypeApplications
                        TypeFamilies
                        TypeOperators
-                       PolyKinds
 
 library
   import:              common-options
   hs-source-dirs:      src
+  other-modules:       Servant.Docs.Simple.Parse
+                       Servant.Docs.Simple.Render
   exposed-modules:     Servant.Docs.Simple
 
 test-suite servant-docs-simple-test
@@ -69,6 +73,9 @@ test-suite servant-docs-simple-test
 
   build-depends:       servant-docs-simple
                      , hspec
+
+  other-modules:       Test.Servant.Docs.Simple
+                       Test.Servant.Docs.Simple.Samples
 
   ghc-options:         -threaded
                        -rtsopts
