@@ -19,24 +19,24 @@ Example:
 
 --}
 
-module Servant.Docs.Simple.Render (Endpoints(..), Details(..), Node(..), Renderable(..), Json(..), PlainText(..)) where
+module Servant.Docs.Simple.Render (Endpoints(..), Details(..), Node(..), Renderable(..), Json(..), Pretty(..), PlainText(..)) where
 
-import Data.Aeson (ToJSON (..), Value (..), (.=), object)
-import Data.Text (Text, pack)
+import Data.Aeson (ToJSON (..), Value (..), object, (.=))
 import Data.List (intersperse)
-import Data.Text.Prettyprint.Doc (Doc, pretty, line, nest, vcat, cat)
+import Data.Text (Text, pack)
+import Data.Text.Prettyprint.Doc (Doc, cat, line, nest, pretty, vcat, vsep)
 
 -- | Documentation format which we render to other formats
-data Endpoints = Endpoints [Node] deriving stock Eq
+newtype Endpoints = Endpoints [Node] deriving stock (Eq, Show)
 
-data Details = Details [Node] | Detail Text deriving stock Eq
-data Node = Node Text Details deriving stock Eq
+data Details = Details [Node] | Detail Text deriving stock (Eq, Show)
+data Node = Node Text Details deriving stock (Eq, Show)
 
 class Renderable a where
   render :: Endpoints -> a
 
 -- | Conversion to JSON using Data.Aeson
-newtype Json = Json { getJson :: Value }
+newtype Json = Json { getJson :: Value } deriving stock (Eq, Show)
 instance Renderable Json where
   render = Json . toJSON
 
@@ -55,17 +55,15 @@ instance Renderable (Pretty ann) where
   render = Pretty . prettyPrint
 
 prettyPrint :: Endpoints -> Doc ann
-prettyPrint (Endpoints ls) = vcat . intersperse line $ fmap (toDoc 0) $ ls
+prettyPrint (Endpoints ls) = vcat . intersperse line $ toDoc 0 <$> ls
 
 toDoc :: Int -> Node -> Doc ann
-toDoc i (Node t d) = nest i formatted
-  where formatted = parameter <> body
-        parameter = pretty t <> ":"
-        body = case d of
-            Detail a -> " " <> pretty a
-            Details as -> cat $ toDoc (i + 2) <$> as
+toDoc i (Node t d) = case d of
+    Detail a   -> cat [pretty t, ": ", pretty a]
+    Details as -> nest i . vsep $ pretty t <> ":"
+                                : (toDoc (i + 4) <$> as)
 
 -- | Conversion to plaintext
-newtype PlainText = PlainText Text
+newtype PlainText = PlainText { getPlainText :: Text } deriving stock (Eq, Show)
 instance Renderable PlainText where
   render = PlainText . pack . show . getPretty . render

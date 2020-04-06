@@ -1,34 +1,42 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Servant.Docs.Simple.Parse (HasParsable, HasDocumentApi, Details (..), Node (..), parse, documentEndpoint) where
 
+import Data.Foldable (fold)
 import Data.Proxy
 import Data.Text (Text, pack)
-import Data.Foldable (fold)
 import Data.Typeable (Typeable, typeRep)
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
+
 import Servant.API ((:>), AuthProtect, BasicAuth, Capture', CaptureAll, Description, Header',
                     HttpVersion, IsSecure, QueryFlag, QueryParam', QueryParams, RemoteHost,
                     ReqBody', StreamBody', Summary, Vault, Verb)
+import Servant.API (EmptyAPI)
 import qualified Servant.API.TypeLevel as S (Endpoints)
 
-import Servant.Docs.Simple.Render (Details(..), Endpoints(..), Node(..))
+import Servant.Docs.Simple.Render (Details (..), Endpoints (..), Node (..))
 
--- | Folds api endpoints into documentation
+-- | Flattens api into type level list
 class HasParsable api where
-    -- | Folds list of endpoints to documentation
     parse :: Endpoints
 
-instance (HasDocumentApi api, HasParsable b) => HasParsable (api ': b) where
-    parse = Endpoints $ documentEndpoint @api : previous
-      where Endpoints previous = parse @b
+instance HasCollatable (S.Endpoints a) => HasParsable a where
+    parse = collate @(S.Endpoints a)
 
-instance HasParsable '[] where
-    parse = Endpoints []
+instance {-# OVERLAPPING #-} HasParsable EmptyAPI where
+    parse = collate @'[]
 
-instance (HasParsable (S.Endpoints a)) => HasParsable a where
-    parse = parse @(S.Endpoints a)
+-- | Folds api endpoints into documentation
+class HasCollatable api where
+    -- | Folds list of endpoints to documentation
+    collate :: Endpoints
+
+instance (HasDocumentApi api, HasCollatable b) => HasCollatable (api ': b) where
+    collate = Endpoints $ documentEndpoint @api : previous
+      where Endpoints previous = collate @b
+
+instance HasCollatable '[] where
+    collate = Endpoints []
 
 -- | Folds an api endpoint into documentation
 documentEndpoint :: forall a. HasDocumentApi a => Node

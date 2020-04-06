@@ -25,6 +25,8 @@ source-repository head
 common common-options
   build-depends:       base >= 4.11.1.0 && < 4.14
                      , aeson
+                     , aeson-pretty
+                     , bytestring
                      , prettyprinter
                      , servant
                      , text
@@ -52,7 +54,6 @@ common common-options
                        FlexibleInstances
                        FunctionalDependencies
                        OverloadedStrings
-                       OverloadedStrings
                        PolyKinds
                        ScopedTypeVariables
                        TypeApplications
@@ -76,8 +77,11 @@ test-suite servant-docs-simple-test
   build-depends:       servant-docs-simple
                      , hspec
                      , hspec-core
+                     , raw-strings-qq
 
   other-modules:       Test.Servant.Docs.Simple
+                       Test.Servant.Docs.Simple.Render
+                       Test.Servant.Docs.Simple.Parse
                        Test.Servant.Docs.Simple.Samples
 
   ghc-options:         -threaded

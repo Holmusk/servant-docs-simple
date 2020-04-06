@@ -1,140 +1,204 @@
 -- | Contains sample Servant API types and their formatted counterparts
+{-# LANGUAGE QuasiQuotes #-}
 
-module Test.Servant.Docs.Simple.Samples where
+module Test.Servant.Docs.Simple.Samples (ApiComplete, ApiMultiple, apiCompletePlainText,
+                                         apiCompleteParsed, apiCompleteJson, apiMultipleParsed) where
 
-import Data.Text (Text, pack, stripSuffix)
-import Data.Text.Prettyprint.Doc (Doc)
-import Data.Foldable (fold)
-import Data.List (intersperse)
-import Servant.API ((:>), AuthProtect, BasicAuth, Capture, CaptureAll,
-                    Description, Header, HttpVersion, IsSecure, Post, QueryFlag,
-                    QueryParam, QueryParams, RemoteHost, ReqBody,
-                    StreamBody, Summary, Vault)
+import Data.Aeson (Value (String), object)
+import Servant.API ((:<|>), (:>), AuthProtect, BasicAuth, Capture, CaptureAll, Description, Header,
+                    HttpVersion, IsSecure, Post, QueryFlag, QueryParam, QueryParams, RemoteHost,
+                    ReqBody, StreamBody, Summary, Vault)
 
-import Servant.Docs.Simple.Render (Endpoints(..), Details(..), Node(..), Renderable(..), Json(..), PlainText(..))
+import Text.RawString.QQ (r)
+
+import Servant.Docs.Simple.Render (Details (..), Endpoints (..), Json (..), Node (..), PlainText (..))
+
+type ApiComplete = StaticRouteTest
+                  :> DynRouteTest
+                  :> CaptureAllTest
+                  :> HttpVersionTest
+                  :> IsSecureTest
+                  :> RemoteHostTest
+                  :> DescriptionTest
+                  :> SummaryTest
+                  :> VaultTest
+                  :> BasicAuthTest
+                  :> AuthTest
+                  :> HeaderTest
+                  :> QueryFlagTest
+                  :> QueryParamTest
+                  :> QueryParamsTest
+                  :> ReqBodyTest
+                  :> StreamBodyTest
+                  :> ResponseTest
+
+apiCompleteParsed :: Endpoints
+apiCompleteParsed = Endpoints [ Node "/test_route/{test::()}/{test::()}"
+                              (Details [ Node "Captures Http Version" (Detail "True")
+                                       , Node "SSL Only" (Detail "True")
+                                       , Node "Captures RemoteHost/IP" (Detail "True")
+                                       , Node "Description" (Detail "sampleText")
+                                       , Node "Summary" (Detail "sampleText")
+                                       , Node "Vault" (Detail "True")
+                                       , Node "Basic Authentication" (Details [ Node "Realm" (Detail "local")
+                                                                              , Node "UserData" (Detail "()")])
+
+                                       , Node "Authentication" (Detail "TEST_JWT")
+
+                                       , Node "RequestHeaders" (Details [ Node "Name" (Detail "test")
+                                                                        , Node "ContentType" (Detail "()")])
+
+                                       , Node "QueryFlag" (Details [Node "Param" (Detail "test")])
+
+                                       , Node "QueryParam" (Details [ Node "Param" (Detail "test")
+                                                                    , Node "ContentType" (Detail "()")])
+
+                                       , Node "QueryParams" (Details [ Node "Param" (Detail "test")
+                                                                     , Node "ContentType" (Detail "()")])
+
+                                       , Node "RequestBody" (Details [ Node "Format" (Detail "': * () ('[] *)")
+                                                                     , Node "ContentType" (Detail "()")])
+
+                                       , Node "StreamBody" (Details [ Node "Format" (Detail "()")
+                                                                    , Node "ContentType" (Detail "()")])
+
+                                       , Node "RequestType" (Detail "'POST")
+
+                                       , Node "Response" (Details [ Node "Format" (Detail "': * () ('[] *)")
+                                                                  , Node "ContentType" (Detail "()")])])]
+
+apiCompleteJson :: Json
+apiCompleteJson = Json (object [ ( "/test_route/{test::()}/{test::()}"
+                                 , object [ ( "StreamBody"
+                                            , object [ ( "Format", String "()")
+                                                     , ( "ContentType", String "()")
+                                                     ])
+
+                                          , ( "Summary",String "sampleText" )
+
+                                          , ( "Basic Authentication"
+                                            , object [ ( "UserData", String "()")
+                                                     , ( "Realm", String "local")
+                                                     ])
+
+                                          , ( "Captures Http Version", String "True")
+
+                                          , ( "QueryParam"
+                                            , object [ ( "Param",String "test")
+                                                     , ( "ContentType",String "()")
+                                                     ])
+
+                                          , ( "Authentication", String "TEST_JWT")
+
+                                          , ( "Response"
+                                            , object [ ( "Format", String "': * () ('[] *)")
+                                                     , ( "ContentType",String "()")
+                                                     ])
+
+                                          , ( "RequestType", String "'POST")
+
+                                          , ( "Vault", String "True")
+
+                                          , ( "Captures RemoteHost/IP", String "True")
+
+                                          , ( "RequestHeaders"
+                                            , object [ ( "Name",String "test")
+                                                     , ( "ContentType",String "()")
+                                                     ])
+
+                                          , ( "SSL Only",String "True")
+
+                                          , ( "QueryParams"
+                                            , object [ ( "Param",String "test")
+                                                     , ( "ContentType",String "()")
+                                                     ])
+
+                                          , ( "Description", String "sampleText")
+
+                                          , ( "QueryFlag", object [( "Param",String "test")])
+
+                                          , ( "RequestBody"
+                                            , object [ ( "Format", String "': * () ('[] *)")
+                                                     , ( "ContentType",String "()")
+                                                     ])
+
+                                          ])])
+
+apiCompletePlainText :: PlainText
+apiCompletePlainText = PlainText [r|/test_route/{test::()}/{test::()}:
+Captures Http Version: True
+SSL Only: True
+Captures RemoteHost/IP: True
+Description: sampleText
+Summary: sampleText
+Vault: True
+Basic Authentication:
+    Realm: local
+    UserData: ()
+Authentication: TEST_JWT
+RequestHeaders:
+    Name: test
+    ContentType: ()
+QueryFlag:
+    Param: test
+QueryParam:
+    Param: test
+    ContentType: ()
+QueryParams:
+    Param: test
+    ContentType: ()
+RequestBody:
+    Format: ': * () ('[] *)
+    ContentType: ()
+StreamBody:
+    Format: ()
+    ContentType: ()
+RequestType: 'POST
+Response:
+    Format: ': * () ('[] *)
+    ContentType: ()|]
+
+type ApiMultiple = ApiComplete :<|> ApiComplete :<|> ApiComplete
+
+apiMultipleParsed :: Endpoints
+apiMultipleParsed = Endpoints $
+                    apiCompleteParsed'
+                 <> apiCompleteParsed'
+                 <> apiCompleteParsed'
+                 where Endpoints apiCompleteParsed' = apiCompleteParsed
 
 type StaticRouteTest = "test_route"
-staticRouteExpected :: Text
-staticRouteExpected = "/test_route"
 
 type DynRouteTest = Capture "test" ()
-dynRouteExpected :: Text
-dynRouteExpected = "/{test::()}"
 
 type CaptureAllTest = CaptureAll "test" ()
-captureAllExpected :: Text
-captureAllExpected = "/{test::()}"
 
 type HttpVersionTest = HttpVersion
-httpVersionExpected :: Text
-httpVersionExpected = "Captures Http Version: True"
 
 type IsSecureTest = IsSecure
-isSecureExpected :: Text
-isSecureExpected = "SSL Only: True"
 
 type RemoteHostTest = RemoteHost
-remoteHostExpected :: Text
-remoteHostExpected = "Captures RemoteHost/IP: True"
 
 type DescriptionTest = Description "sampleText"
-descriptionExpected :: Text
-descriptionExpected = "Description: sampleText"
 
 type SummaryTest = Summary "sampleText"
-summaryExpected :: Text
-summaryExpected = "Summary: sampleText"
 
 type VaultTest = Vault
-vaultExpected :: Text
-vaultExpected = "Vault: True"
 
 type BasicAuthTest = BasicAuth "local" ()
-basicAuthExpected :: Text
-basicAuthExpected = vcat [ "Basic Authentication: "
-                         , "  Realm: local"
-                         , "  UserData: ()"
-                         ]
 
 type AuthTest = AuthProtect "TEST_JWT"
-authExpected :: Text
-authExpected = "Authentication: TEST_JWT"
 
 type HeaderTest = Header "test" ()
-headerExpected :: Text
-headerExpected = vcat [ "RequestHeaders:"
-                      , "  Name: test"
-                      , "  ContentType: ()"
-                      ]
 
 type QueryFlagTest = QueryFlag "test"
-queryFlagExpected :: Text
-queryFlagExpected = vcat [ "QueryFlag:"
-                         , "  Param: test"
-                         ]
 
 type QueryParamTest = QueryParam "test" ()
-queryParamExpected :: Text
-queryParamExpected = vcat [ "QueryParam:"
-                          , "  Param: test"
-                          , "  ContentType: ()"
-                          ]
 
 type QueryParamsTest = QueryParams "test" ()
-queryParamsExpected :: Text
-queryParamsExpected = vcat [ "QueryParams:"
-                          , "  Param: test"
-                          , "  ContentType: ()"
-                          ]
 
 type ReqBodyTest = ReqBody '[()] ()
-reqBodyExpected :: Text
-reqBodyExpected = vcat [ "RequestBody:"
-                       , "  Format: ': * () ('[] *)"
-                       , "  ContentType: ()"
-                       ]
 
 type StreamBodyTest = StreamBody () ()
-streamBodyExpected :: Text
-streamBodyExpected = vcat [ "StreamBody:"
-                          , "  Format: ()"
-                          , "  ContentType: ()"
-                          ]
 
 type ResponseTest = Post '[()] ()
-responseExpected :: Text
-responseExpected = vcat [ "RequestType: 'POST"
-                        , "Response:"
-                        , "  Format: ': * () ('[] *)"
-                        , "  ContentType: ()"
-                        ]
-
-type ApiRoute = StaticRouteTest
-             :> AuthTest
-             :> DynRouteTest
-             :> HeaderTest
-             :> ReqBodyTest
-             :> ResponseTest
-
-apiRouteExpected :: Text
-apiRouteExpected = vcat [ staticRouteExpected <> dynRouteExpected
-                        , authExpected
-                        , headerExpected
-                        , reqBodyExpected
-                        , responseExpected
-                        ]
-
-apiCollatedExpected :: Text
-apiCollatedExpected = vcat [ apiRouteExpected <> "\n\n"
-                           , apiRouteExpected <> "\n\n"
-                           ]
-
--- Helpers --
-responseSuffix :: Text
-responseSuffix = responseExpected
-
-vcat :: [Text] -> Text
-vcat = fold . intersperse ("\n" :: Text)
-
-stripResponse :: Doc ann -> Maybe Text
-stripResponse = stripSuffix ("\n" <> responseSuffix) . pack . show
