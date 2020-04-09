@@ -1,0 +1,15 @@
+- arguments:
+  - -XAllowAmbiguousTypes
+  - -XConstraintKinds
+  - -XDataKinds
+  - -XDerivingStrategies
+  - -XFlexibleInstances
+  - -XFunctionalDependencies
+  - -XOverloadedStrings
+  - -XPolyKinds
+  - -XScopedTypeVariables
+  - -XTypeApplications
+  - -XTypeFamilies
+  - -XTypeOperators
+
+- ignore: {name: "Reduce duplication"}
