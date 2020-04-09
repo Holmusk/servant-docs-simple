@@ -11,7 +11,8 @@ import Servant.API ((:<|>), (:>), AuthProtect, BasicAuth, Capture, CaptureAll, D
 
 import Text.RawString.QQ (r)
 
-import Servant.Docs.Simple.Render (Details (..), Endpoints (..), Json (..), Node (..), PlainText (..))
+import Servant.Docs.Simple.Render (Details (..), Endpoints (..), Json (..), Node (..),
+                                   PlainText (..))
 
 type ApiComplete = StaticRouteTest
                   :> DynRouteTest

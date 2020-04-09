@@ -70,7 +70,7 @@ newtype Endpoints = Endpoints [Node] deriving stock (Eq, Show)
 -- And so parsing __@Response '[()] ()@__ comes together as:
 --
 -- > Node "Response"                                               --- Parameter
--- >      (Details [ Node "Format"                   -- Parameter  --- 
+-- >      (Details [ Node "Format"                   -- Parameter  ---
 -- >                      (Detail "': * () ('[] *)") -- Value         |
 -- >               , Node "ContentType"              -- Parameter     | Value
 -- >                      (Detail "()")              -- Value         |

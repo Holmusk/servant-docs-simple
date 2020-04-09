@@ -11,10 +11,9 @@ import Data.Text (Text, pack)
 import Data.Typeable (Typeable, typeRep)
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 
-import Servant.API ((:>), AuthProtect, BasicAuth, Capture', CaptureAll, Description, Header',
+import Servant.API ((:>), AuthProtect, BasicAuth, Capture', CaptureAll, Description, EmptyAPI, Header',
                     HttpVersion, IsSecure, QueryFlag, QueryParam', QueryParams, RemoteHost,
                     ReqBody', StreamBody', Summary, Vault, Verb)
-import Servant.API (EmptyAPI)
 import qualified Servant.API.TypeLevel as S (Endpoints)
 
 import Servant.Docs.Simple.Render (Details (..), Endpoints (..), Node (..))
@@ -110,7 +109,7 @@ instance (HasDocumentApi b, KnownSymbol realm, Typeable a) => HasDocumentApi (Ba
                                Details [ Node "Realm" (Detail realm)
                                        , Node "UserData" (Detail userData)
                                        ]
-              realm = (symbolVal' @realm)
+              realm = symbolVal' @realm
               userData = typeText @a
 
 -- | Authentication documentation

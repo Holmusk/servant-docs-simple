@@ -10,10 +10,7 @@ import Data.Aeson.Encode.Pretty (encodePretty)
 import Data.ByteString.Lazy as B (writeFile)
 import Data.Text.IO as T (writeFile)
 import Servant.Docs.Simple.Parse (HasParsable (..))
-import Servant.Docs.Simple.Render ( Json (..)
-                                  , PlainText (..)
-                                  , Renderable (..)
-                                  )
+import Servant.Docs.Simple.Render (Json (..), PlainText (..), Renderable (..))
 
 
 -- | Write documentation as PlainText to file
