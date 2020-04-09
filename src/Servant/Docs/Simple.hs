@@ -1,21 +1,4 @@
-{- | Simple documentation for API endpoints
-
-TODO: Add language extensions used
-
-Example:
-
-@
-    import Servant.Docs.Simple (collate)
-    import Servant.API.Typelevel (Endpoints, ReqBody', Request)
-
-    type Request = ReqBody '[()] ()
-    type Response = Post '[()] ()
-    type API = "hello" :> "world" :> Request :> Response
-
-    documentation :: Text
-    documentation = collate @(Endpoints API)
-@
--}
+-- | Documentation for API endpoints
 
 module Servant.Docs.Simple ( document
                            , documentWith
