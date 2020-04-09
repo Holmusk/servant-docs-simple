@@ -1,6 +1,9 @@
+{- | Parse Servant API into documentation
+-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Servant.Docs.Simple.Parse (HasParsable, HasDocumentApi, Details (..), Node (..), parse, documentEndpoint) where
+module Servant.Docs.Simple.Parse (HasParsable (..)) where
+
 
 import Data.Foldable (fold)
 import Data.Proxy
@@ -16,7 +19,7 @@ import qualified Servant.API.TypeLevel as S (Endpoints)
 
 import Servant.Docs.Simple.Render (Details (..), Endpoints (..), Node (..))
 
--- | Flattens api into type level list
+-- | Flattens API into type level list of 'Endpoints'
 class HasParsable api where
     parse :: Endpoints
 
