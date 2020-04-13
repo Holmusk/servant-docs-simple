@@ -2,13 +2,16 @@
 
 module Servant.Docs.Simple ( document
                            , documentWith
+                           , stdoutJson
+                           , stdoutPlainText
                            , writeDocsJson
                            , writeDocsPlainText
                            ) where
 
 import Data.Aeson.Encode.Pretty (encodePretty)
-import Data.ByteString.Lazy as B (writeFile)
-import Data.Text.IO as T (writeFile)
+import qualified Data.ByteString.Lazy as B (writeFile)
+import qualified Data.ByteString.Lazy.Char8 as BC (putStrLn)
+import qualified Data.Text.IO as T (putStrLn, writeFile)
 import Servant.Docs.Simple.Parse (HasParsable (..))
 import Servant.Docs.Simple.Render (Json (..), PlainText (..), Renderable (..))
 
@@ -17,9 +20,17 @@ import Servant.Docs.Simple.Render (Json (..), PlainText (..), Renderable (..))
 writeDocsPlainText :: forall api. HasParsable api => FilePath -> IO ()
 writeDocsPlainText fp = T.writeFile fp . getPlainText $ document @api
 
--- | Write documentation as Json to file
+-- | Write documentation as JSON to file
 writeDocsJson :: forall api. HasParsable api => FilePath -> IO ()
 writeDocsJson fp = B.writeFile fp . encodePretty . getJson $ documentWith @api @Json
+
+-- | Write documentation as PlainText to stdout
+stdoutPlainText :: forall api. HasParsable api => IO ()
+stdoutPlainText = T.putStrLn . getPlainText $ document @api
+
+-- | Write documentation as JSON to stdout
+stdoutJson :: forall api. HasParsable api => IO ()
+stdoutJson = BC.putStrLn . encodePretty . getJson $ documentWith @api @Json
 
 -- | Convert API type into PlainText format
 document :: forall api. HasParsable api => PlainText
