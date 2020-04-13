@@ -6,13 +6,22 @@
 [![Stackage Nightly](http://stackage.org/package/servant-docs-simple/badge/nightly)](http://stackage.org/nightly/package/servant-docs-simple)
 [![MIT license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-This library provides tools to:
+# Introduction
 
-1) Parse `Servant API` types into a documentation friendly structure (see Servant.Docs.Simple.Parse)
+This library uses
+[Data.Typeable](http://hackage.haskell.org/package/base-4.12.0.0/docs/Data-Typeable.html)
+to generate documentation for [Servant](https://hackage.haskell.org/package/servant) API types.
 
-2) Render the structure into various documentation structures (see Servant.Docs.Simple.Render)
+It relies on the `typeRep` of Servant's combinators and custom types used in
+the API to generate the documentation.
 
-3) Provides convenient functions to write rendered formats to file
+# Functionality
+
+- Parses the API into a documentation friendly structure (see Servant.Docs.Simple.Parse)
+
+- Renders the structure into common documentation formats (see Servant.Docs.Simple.Render)
+
+- Provides functions to write rendered formats to file/stdout
 
 # Tutorials
 
@@ -31,7 +40,3 @@ stack examples/<source file>
 ![Generating the intermediate documentation structure](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/parse.hs)
 
 ![Writing our own rendering format](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/format.hs)
-
-# FAQ
-
-- Why use this library when we already have `Servant.Docs`?
