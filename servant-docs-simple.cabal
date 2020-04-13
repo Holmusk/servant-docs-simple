@@ -3,13 +3,13 @@ name:                servant-docs-simple
 version:             0.1.0.0
 synopsis:            Generate documentation from API type
 description:         Generate documentation from API type
-homepage:            https://github.com/kwannoel/servant-docs-simple
-bug-reports:         https://github.com/kwannoel/servant-docs-simple/issues
+homepage:            https://github.com/Holmusk/servant-docs-simple
+bug-reports:         https://github.com/Holmusk/servant-docs-simple/issues
 license:             MIT
 license-file:        LICENSE
 author:              kwannoel
-maintainer:          kwannoel <noelkwan1998@gmail.com>
-copyright:           2020 kwannoel
+maintainer:          Holmusk <tech@holmusk.com>
+copyright:           2020 Holmusk
 category:            Utility
 build-type:          Simple
 extra-doc-files:     README.md
