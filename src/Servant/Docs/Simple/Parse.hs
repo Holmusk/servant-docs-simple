@@ -11,8 +11,8 @@ import Data.Text (Text, pack)
 import Data.Typeable (Typeable, typeRep)
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 
-import Servant.API ((:>), AuthProtect, BasicAuth, Capture', CaptureAll, Description, EmptyAPI, Header',
-                    HttpVersion, IsSecure, QueryFlag, QueryParam', QueryParams, RemoteHost,
+import Servant.API ((:>), AuthProtect, BasicAuth, Capture', CaptureAll, Description, EmptyAPI,
+                    Header', HttpVersion, IsSecure, QueryFlag, QueryParam', QueryParams, RemoteHost,
                     ReqBody', StreamBody', Summary, Vault, Verb)
 import qualified Servant.API.TypeLevel as S (Endpoints)
 

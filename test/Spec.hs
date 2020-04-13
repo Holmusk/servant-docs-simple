@@ -6,8 +6,7 @@ import Test.Servant.Docs.Simple.Parse (parseSpec)
 import Test.Servant.Docs.Simple.Render (renderSpec)
 
 main :: IO ()
-main = do
-    hspec $ sequential $ do
-        renderSpec
-        parseSpec
-        mainSpec
+main = hspec $ sequential $ do
+    renderSpec
+    parseSpec
+    mainSpec
