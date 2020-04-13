@@ -10,7 +10,7 @@ docs:
 	stack haddock servant-docs-simple --no-haddock-deps --fast --open
 
 stylish-haskell:
-	stylish-haskell src/**/*.hs test/**/*.hs -i
+	stylish-haskell src/**/*.hs test/**/*.hs examples/*.hs -i
 
 hlint:
-	hlint -h .hlint.yaml test src
+	hlint -h .hlint.yaml test src examples

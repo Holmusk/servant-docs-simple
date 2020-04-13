@@ -16,96 +16,21 @@ This library provides tools to:
 
 # Tutorials
 
-*Generating plaintext/JSON documentation from api types*
+To run these:
 
-``` haskell
+``` sh
+# clone this repository
+git clone git@github.com:Holmusk/servant-docs-simple.git
 
-{-# LANGUAGE TypeApplications #-}
-
-import Servant.Docs.Simple (documentation)
-import Servant.Docs.Simple.Render (Json)
-import Data.Aeson (Value)
-import Data.Text (Text)
-
--- Our API type
-type API = "hello" :> "world" :> Request :> Response
-type Request = ReqBody '[()] ()
-type Response = Post '[()] ()
-
--- Render API as Text documentation
-documentText :: Text
-documentText = getText $ document @API
-
--- Render API as Json documentation, represented using Data.Aeson
-documentJson :: Value
-documentJson = getJson $ documentWith @API @Json
-
-main :: IO ()
-main = do
-  writeDocsJson "docsJson"           -- Writes to the file $PWD/docsJson
-  writeDocsPlainText "docsPlainText" -- Writes to the file $PWD/docsPlainText
-
+# run the examples
+stack examples/<source file>
 ```
 
-*Generating the intermediate documentation structure*
+![Generating plaintext/JSON documentation from api types](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/render.hs)
 
-``` haskell
+![Generating the intermediate documentation structure](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/parse.hs)
 
-{-# LANGUAGE TypeApplications #-}
-
-import Servant.Docs.Simple.Parse (parse)
-
--- Our API type
-type API = "hello" :> "world" :> Request :> Response
-type Request = ReqBody '[()] ()
-type Response = Post '[()] ()
-
--- Intermediate documentation structure
-documentTree :: Endpoints
-documentTree = parse @API
-
-```
-
-*Writing our own rendering format*
-
-``` haskell
--- You may reference Renderable instances in Servant.Docs.Simple.Render for more examples
-
-{-# LANGUAGE TypeApplications #-}
-
-import Servant.Docs.Simple.Parse (parse)
-import Servant.Docs.Simple.Render (Renderable (..))
-
--- Our API type
-type API = "hello" :> "world" :> Request :> Response
-type Request = ReqBody '[()] ()
-type Response = Post '[()] ()
-
--- Intermediate documentation structure
-documentTree :: Endpoints
-documentTree = parse @API
-
--- Our custom datatype which we would like to render to
-data Documented = Documented [Endpt] -- A list of documentation for all endpoints
-
--- Each endpoint consists of
--- Route: (/../../) 
--- Information: (headers, request, response etc..)
-data Endpt = Endpt Route Information 
-type Route = String
-type Information = String
-
-instance Renderable Endpt where
-  render (Endpoints ls) = Documented ls'
-    where ls' = convert <$> ls
-          convert (Node route info) = Endpt route (getInfo info)
-
--- | Just mush everything together
-getInfo :: Details -> String
-getInfo (Detail t) = t 
-getInfo (Details ls) = foldMap (\(Node t rest) -> t <> getInfo rest) ls
-
-```
+![Writing our own rendering format](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/format.hs)
 
 # FAQ
 
