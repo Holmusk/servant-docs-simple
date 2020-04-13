@@ -14,59 +14,11 @@ import Text.RawString.QQ (r)
 import Servant.Docs.Simple.Render (Details (..), Endpoints (..), Json (..), Node (..),
                                    PlainText (..))
 
-type ApiComplete = StaticRouteTest
-                  :> DynRouteTest
-                  :> CaptureAllTest
-                  :> HttpVersionTest
-                  :> IsSecureTest
-                  :> RemoteHostTest
-                  :> DescriptionTest
-                  :> SummaryTest
-                  :> VaultTest
-                  :> BasicAuthTest
-                  :> AuthTest
-                  :> HeaderTest
-                  :> QueryFlagTest
-                  :> QueryParamTest
-                  :> QueryParamsTest
-                  :> ReqBodyTest
-                  :> StreamBodyTest
-                  :> ResponseTest
+
+type ApiComplete = StaticRouteTest :> DynRouteTest :> CaptureAllTest :> ApiDetails
 
 apiCompleteParsed :: Endpoints
-apiCompleteParsed = Endpoints [ Node "/test_route/{test::()}/{test::()}"
-                              (Details [ Node "Captures Http Version" (Detail "True")
-                                       , Node "SSL Only" (Detail "True")
-                                       , Node "Captures RemoteHost/IP" (Detail "True")
-                                       , Node "Description" (Detail "sampleText")
-                                       , Node "Summary" (Detail "sampleText")
-                                       , Node "Vault" (Detail "True")
-                                       , Node "Basic Authentication" (Details [ Node "Realm" (Detail "local")
-                                                                              , Node "UserData" (Detail "()")])
-
-                                       , Node "Authentication" (Detail "TEST_JWT")
-
-                                       , Node "RequestHeaders" (Details [ Node "Name" (Detail "test")
-                                                                        , Node "ContentType" (Detail "()")])
-
-                                       , Node "QueryFlag" (Details [Node "Param" (Detail "test")])
-
-                                       , Node "QueryParam" (Details [ Node "Param" (Detail "test")
-                                                                    , Node "ContentType" (Detail "()")])
-
-                                       , Node "QueryParams" (Details [ Node "Param" (Detail "test")
-                                                                     , Node "ContentType" (Detail "()")])
-
-                                       , Node "RequestBody" (Details [ Node "Format" (Detail "': * () ('[] *)")
-                                                                     , Node "ContentType" (Detail "()")])
-
-                                       , Node "StreamBody" (Details [ Node "Format" (Detail "()")
-                                                                    , Node "ContentType" (Detail "()")])
-
-                                       , Node "RequestType" (Detail "'POST")
-
-                                       , Node "Response" (Details [ Node "Format" (Detail "': * () ('[] *)")
-                                                                  , Node "ContentType" (Detail "()")])])]
+apiCompleteParsed = Endpoints [ Node "/test_route/{test::()}/{test::()}" apiDetails ]
 
 apiCompleteJson :: Json
 apiCompleteJson = Json (object [ ( "/test_route/{test::()}/{test::()}"
@@ -159,14 +111,66 @@ Response:
     Format: ': * () ('[] *)
     ContentType: ()|]
 
-type ApiMultiple = ApiComplete :<|> ApiComplete :<|> ApiComplete
+type ApiMultiple = "route1" :> DynRouteTest :> CaptureAllTest :> ApiDetails
+              :<|> "route2" :> DynRouteTest :> CaptureAllTest :> ApiDetails
+              :<|> "route3" :> DynRouteTest :> CaptureAllTest :> ApiDetails
 
 apiMultipleParsed :: Endpoints
-apiMultipleParsed = Endpoints $
-                    apiCompleteParsed'
-                 <> apiCompleteParsed'
-                 <> apiCompleteParsed'
-                 where Endpoints apiCompleteParsed' = apiCompleteParsed
+apiMultipleParsed = Endpoints [ Node "/route1/{test::()}/{test::()}" apiDetails
+                              , Node "/route2/{test::()}/{test::()}" apiDetails
+                              , Node "/route3/{test::()}/{test::()}" apiDetails
+                              ]
+
+
+type ApiDetails = HttpVersionTest
+               :> IsSecureTest
+               :> RemoteHostTest
+               :> DescriptionTest
+               :> SummaryTest
+               :> VaultTest
+               :> BasicAuthTest
+               :> AuthTest
+               :> HeaderTest
+               :> QueryFlagTest
+               :> QueryParamTest
+               :> QueryParamsTest
+               :> ReqBodyTest
+               :> StreamBodyTest
+               :> ResponseTest
+
+apiDetails :: Details
+apiDetails = Details [ Node "Captures Http Version" (Detail "True")
+                     , Node "SSL Only" (Detail "True")
+                     , Node "Captures RemoteHost/IP" (Detail "True")
+                     , Node "Description" (Detail "sampleText")
+                     , Node "Summary" (Detail "sampleText")
+                     , Node "Vault" (Detail "True")
+                     , Node "Basic Authentication" (Details [ Node "Realm" (Detail "local")
+                                                            , Node "UserData" (Detail "()")])
+
+                     , Node "Authentication" (Detail "TEST_JWT")
+
+                     , Node "RequestHeaders" (Details [ Node "Name" (Detail "test")
+                                                      , Node "ContentType" (Detail "()")])
+
+                     , Node "QueryFlag" (Details [Node "Param" (Detail "test")])
+
+                     , Node "QueryParam" (Details [ Node "Param" (Detail "test")
+                                                  , Node "ContentType" (Detail "()")])
+
+                     , Node "QueryParams" (Details [ Node "Param" (Detail "test")
+                                                   , Node "ContentType" (Detail "()")])
+
+                     , Node "RequestBody" (Details [ Node "Format" (Detail "': * () ('[] *)")
+                                                   , Node "ContentType" (Detail "()")])
+
+                     , Node "StreamBody" (Details [ Node "Format" (Detail "()")
+                                                  , Node "ContentType" (Detail "()")])
+
+                     , Node "RequestType" (Detail "'POST")
+
+                     , Node "Response" (Details [ Node "Format" (Detail "': * () ('[] *)")
+                                                , Node "ContentType" (Detail "()")])]
 
 type StaticRouteTest = "test_route"
 
