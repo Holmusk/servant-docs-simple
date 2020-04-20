@@ -1,4 +1,59 @@
--- | Provides an Intermediate documentation structure ('Endpoints'), and renderable formats ('Renderable')
+{- | Renders the intermediate structure into common documentation formats
+
+__Example scripts__
+
+[Generating plaintext/JSON documentation from api types](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/render.hs)
+
+[Writing our own rendering format](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/format.hs)
+
+__Example of rendering the intermediate structure__
+
+/Intermediate structure/
+
+> Endpoints [Node "/hello/world"
+>                 (Details [ Node "RequestBody" (Details [ Node "Format"
+>                                                               (Detail "': * () ('[] *)")
+>                                                        , Node "ContentType"
+>                                                               (Detail "()")
+>                                                        ])
+>                          , Node "RequestType" (Detail "'POST")
+>                          , Node "Response" (Details [ Node "Format"
+>                                                            (Detail "': * () ('[] *)")
+>                                                     , Node "ContentType"
+>                                                            (Detail "()")
+>                                                     ])
+>                          ])]
+
+
+/JSON/
+
+> {
+>     "/hello/world": {
+>         "Response": {
+>             "Format": "': * () ('[] *)",
+>             "ContentType": "()"
+>         },
+>         "RequestType": "'POST",
+>         "RequestBody": {
+>             "Format": "': * () ('[] *)",
+>             "ContentType": "()"
+>         }
+>     }
+> }
+
+/Text/
+
+> /hello/world:
+> RequestBody:
+>     Format: ': * () ('[] *)
+>     ContentType: ()
+> RequestType: 'POST
+> Response:
+>     Format: ': * () ('[] *)
+>     ContentType: ()
+
+-}
+
 module Servant.Docs.Simple.Render ( Details (..)
                                   , Endpoints (..)
                                   , Node (..)
@@ -47,7 +102,7 @@ newtype Endpoints = Endpoints [Node] deriving stock (Eq, Show)
 --
 -- __Example 1__
 --
--- An endpoint is represented as a node, with the __route__ as its parameter and its Details as its value
+-- An endpoint is represented as a node, with the route as its parameter and its Details as its value
 --
 -- > Node "/users/get" <Details>
 --
@@ -59,15 +114,15 @@ newtype Endpoints = Endpoints [Node] deriving stock (Eq, Show)
 --
 -- > Response '[()] ()
 --
--- This can be interpreted as a __Response__ parameter, with a value of 2 Details, __Format__ and __ContentType__
+-- This can be interpreted as a Response parameter, with a value of 2 Details, Format and ContentType
 --
 -- In turn, this:
 --
--- > Format: @'[()]@
+-- > Format: '[()]
 --
--- can be interpreted as a __Format__ parameter with a value of __@'[()]@__.
+-- can be interpreted as a Format parameter with a value of @'[()]@.
 --
--- And so parsing __@Response '[()] ()@__ comes together as:
+-- And so parsing @Response '[()] ()@ comes together as:
 --
 -- > Node "Response"                                               --- Parameter
 -- >      (Details [ Node "Format"                   -- Parameter  ---
@@ -86,7 +141,7 @@ data Details = Details [Node] -- ^ List of Parameter-Value pairs
              | Detail Text    -- ^ Single Value
              deriving stock (Eq, Show)
 
--- | Convert __Endpoints__ into different documentation formats
+-- | Convert Endpoints into different documentation formats
 class Renderable a where
   render :: Endpoints -> a
 

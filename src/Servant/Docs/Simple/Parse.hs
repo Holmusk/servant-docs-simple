@@ -1,5 +1,35 @@
 {- | Parse Servant API into documentation
+
+__Example script__
+
+[Generating the intermediate documentation structure](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/parse.hs)
+
+__Example of parsing an API__
+
+/API type/
+
+> type API = "hello" :> "world" :> Request :> Response
+> type Request = ReqBody '[()] ()
+> type Response = Post '[()] ()
+
+/Intermediate structure/
+
+> Endpoints [Node "/hello/world"
+>                 (Details [ Node "RequestBody" (Details [ Node "Format"
+>                                                               (Detail "': * () ('[] *)")
+>                                                        , Node "ContentType"
+>                                                               (Detail "()")
+>                                                        ])
+>                          , Node "RequestType" (Detail "'POST")
+>                          , Node "Response" (Details [ Node "Format"
+>                                                            (Detail "': * () ('[] *)")
+>                                                     , Node "ContentType"
+>                                                            (Detail "()")
+>                                                     ])
+>                          ])]
+
 -}
+
 {-# LANGUAGE UndecidableInstances #-}
 
 module Servant.Docs.Simple.Parse (HasParsable (..)) where

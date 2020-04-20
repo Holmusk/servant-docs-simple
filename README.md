@@ -25,96 +25,7 @@ miscellaneous details.
 
 [**In-depth explanation here**](https://github.com/Holmusk/servant-docs-simple#faq)
 
-# Functionality
-
-## Servant.Docs.Simple.Parse
-
-*Parses the API into a documentation friendly structure*
-
-**API type**
-
-``` haskell
-type API = "hello" :> "world" :> Request :> Response
-type Request = ReqBody '[()] ()
-type Response = Post '[()] ()
-
-```
-
-**Intermediate structure**
-
-``` haskell
-Endpoints [Node "/hello/world" 
-                (Details [ Node "RequestBody" (Details [ Node "Format" 
-                                                              (Detail "': * () ('[] *)")
-                                                       , Node "ContentType"
-                                                              (Detail "()")
-                                                       ])
-                         , Node "RequestType" (Detail "'POST")
-                         , Node "Response" (Details [ Node "Format"
-                                                           (Detail "': * () ('[] *)")
-                                                    , Node "ContentType"
-                                                           (Detail "()")
-                                                    ])
-                         ])]
-```
-
-## Servant.Docs.Simple.Render
-
-*Renders the intermediate structure into common documentation formats*
-
-**Intermediate structure**
-
-``` haskell
-Endpoints [Node "/hello/world" 
-                (Details [ Node "RequestBody" (Details [ Node "Format" 
-                                                              (Detail "': * () ('[] *)")
-                                                       , Node "ContentType"
-                                                              (Detail "()")
-                                                       ])
-                         , Node "RequestType" (Detail "'POST")
-                         , Node "Response" (Details [ Node "Format"
-                                                           (Detail "': * () ('[] *)")
-                                                    , Node "ContentType"
-                                                           (Detail "()")
-                                                    ])
-                         ])]
-```
-
-
-**JSON**
-
-``` json
-{
-    "/hello/world": {
-        "Response": {
-            "Format": "': * () ('[] *)",
-            "ContentType": "()"
-        },
-        "RequestType": "'POST",
-        "RequestBody": {
-            "Format": "': * () ('[] *)",
-            "ContentType": "()"
-        }
-    }
-}
-```
-
-**Text**
-
-``` text
-/hello/world:
-RequestBody:
-    Format: ': * () ('[] *)
-    ContentType: ()
-RequestType: 'POST
-Response:
-    Format: ': * () ('[] *)
-    ContentType: ()
-```
-
-## Servant.Docs.Simple
-
-*Provides functions to write rendered formats to file/stdout*
+# Example usage
 
 **Using this script**
 
@@ -151,7 +62,7 @@ main = do
 
 **Expected Output**
 
-*Files should be generated relative to $PWD*
+*Files should be generated relative to `$PWD`*
 
 ``` sh
 $ ls | grep docs

@@ -1,4 +1,77 @@
--- | Documentation for API endpoints
+{- | Parse and render an API type, write documentation to file, stdout
+
+__Example script__
+
+[Writing documentation to file](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/parse.hs)
+
+__Using this script__
+
+/With the following language extensions/
+
+> DataKinds
+> TypeApplications
+> TypeOperators
+
+
+> module Main where
+>
+> import Data.Aeson (Value)
+> import Data.Text (Text)
+>
+> import Servant.API ((:>), Post, ReqBody)
+> import Servant.Docs.Simple (document, documentWith, stdoutJson, stdoutPlainText, writeDocsJson,
+>                             writeDocsPlainText)
+> import Servant.Docs.Simple.Render (Json (..), PlainText (..))
+>
+> -- Our API type
+> type API = "hello" :> "world" :> Request :> Response
+> type Request = ReqBody '[()] ()
+> type Response = Post '[()] ()
+>
+> main :: IO ()
+> main = do
+>   -- Writes to the file $PWD/docsJson
+>   writeDocsJson @API "docs.json"
+>
+>   -- Writes to the file $PWD/docsPlainText
+>   writeDocsPlainText @API "docs.txt"
+
+__Expected Output__
+
+/Files should be generated relative to @$PWD@/
+
+> $ ls | grep docs
+> docs.json
+> docs.txt
+
+/docs.json/
+
+> {
+>     "/hello/world": {
+>         "Response": {
+>             "Format": "': * () ('[] *)",
+>             "ContentType": "()"
+>         },
+>         "RequestType": "'POST",
+>         "RequestBody": {
+>             "Format": "': * () ('[] *)",
+>             "ContentType": "()"
+>         }
+>     }
+> }
+
+/docs.txt/
+
+> /hello/world:
+> RequestBody:
+>     Format: ': * () ('[] *)
+>     ContentType: ()
+> RequestType: 'POST
+> Response:
+>     Format: ': * () ('[] *)
+>     ContentType: ()
+
+-}
 
 module Servant.Docs.Simple ( document
                            , documentWith
