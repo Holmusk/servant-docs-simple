@@ -5,20 +5,20 @@ module Test.Servant.Docs.Simple.Samples (ApiComplete, ApiMultiple, apiCompletePl
                                          apiCompleteParsed, apiCompleteJson, apiMultipleParsed) where
 
 import Data.Aeson (Value (String), object)
+import Data.Map.Ordered (fromList, singleton)
 import Servant.API ((:<|>), (:>), AuthProtect, BasicAuth, Capture, CaptureAll, Description, Header,
                     HttpVersion, IsSecure, Post, QueryFlag, QueryParam, QueryParams, RemoteHost,
                     ReqBody, StreamBody, Summary, Vault)
 
 import Text.RawString.QQ (r)
 
-import Servant.Docs.Simple.Render (Details (..), Endpoints (..), Json (..), Node (..),
-                                   PlainText (..))
+import Servant.Docs.Simple.Render (Details (..), ApiDocs (..), Json (..), PlainText (..))
 
 
 type ApiComplete = StaticRouteTest :> DynRouteTest :> CaptureAllTest :> ApiDetails
 
-apiCompleteParsed :: Endpoints
-apiCompleteParsed = Endpoints [ Node "/test_route/{test::()}/{test::()}" apiDetails ]
+apiCompleteParsed :: ApiDocs
+apiCompleteParsed = ApiDocs $ curry singleton "/test_route/{test::()}/{test::()}" apiDetails
 
 apiCompleteJson :: Json
 apiCompleteJson = Json (object [ ( "/test_route/{test::()}/{test::()}"
@@ -115,11 +115,11 @@ type ApiMultiple = "route1" :> DynRouteTest :> CaptureAllTest :> ApiDetails
               :<|> "route2" :> DynRouteTest :> CaptureAllTest :> ApiDetails
               :<|> "route3" :> DynRouteTest :> CaptureAllTest :> ApiDetails
 
-apiMultipleParsed :: Endpoints
-apiMultipleParsed = Endpoints [ Node "/route1/{test::()}/{test::()}" apiDetails
-                              , Node "/route2/{test::()}/{test::()}" apiDetails
-                              , Node "/route3/{test::()}/{test::()}" apiDetails
-                              ]
+apiMultipleParsed :: ApiDocs
+apiMultipleParsed = ApiDocs $ fromList $ [ ("/route1/{test::()}/{test::()}", apiDetails)
+                                         , ("/route2/{test::()}/{test::()}", apiDetails)
+                                         , ("/route3/{test::()}/{test::()}", apiDetails)
+                                         ]
 
 
 type ApiDetails = HttpVersionTest
@@ -139,38 +139,46 @@ type ApiDetails = HttpVersionTest
                :> ResponseTest
 
 apiDetails :: Details
-apiDetails = Details [ Node "Captures Http Version" (Detail "True")
-                     , Node "SSL Only" (Detail "True")
-                     , Node "Captures RemoteHost/IP" (Detail "True")
-                     , Node "Description" (Detail "sampleText")
-                     , Node "Summary" (Detail "sampleText")
-                     , Node "Vault" (Detail "True")
-                     , Node "Basic Authentication" (Details [ Node "Realm" (Detail "local")
-                                                            , Node "UserData" (Detail "()")])
+apiDetails = Details $ fromList [ ("Captures Http Version", Detail "True")
+                                , ("SSL Only", Detail "True")
+                                , ("Captures RemoteHost/IP", Detail "True")
+                                , ("Description", Detail "sampleText")
+                                , ("Summary", Detail "sampleText")
+                                , ("Vault", Detail "True")
+                                , ("Basic Authentication", Details $ fromList [ ("Realm", Detail "local")
+                                                                              , ("UserData", Detail "()")
+                                                                              ])
 
-                     , Node "Authentication" (Detail "TEST_JWT")
+                                , ("Authentication", Detail "TEST_JWT")
 
-                     , Node "RequestHeaders" (Details [ Node "Name" (Detail "test")
-                                                      , Node "ContentType" (Detail "()")])
+                                , ("RequestHeaders", Details $ fromList [ ("Name", Detail "test")
+                                                                        , ("ContentType", Detail "()")
+                                                                        ])
 
-                     , Node "QueryFlag" (Details [Node "Param" (Detail "test")])
+                                , ("QueryFlag", Details $ curry singleton "Param" (Detail "test"))
 
-                     , Node "QueryParam" (Details [ Node "Param" (Detail "test")
-                                                  , Node "ContentType" (Detail "()")])
+                                , ("QueryParam", Details $ fromList [ ("Param", Detail "test")
+                                                                    , ("ContentType", Detail "()")
+                                                                    ])
 
-                     , Node "QueryParams" (Details [ Node "Param" (Detail "test")
-                                                   , Node "ContentType" (Detail "()")])
+                                , ("QueryParams", Details $ fromList [ ("Param", Detail "test")
+                                                                     , ("ContentType", Detail "()")
+                                                                     ])
 
-                     , Node "RequestBody" (Details [ Node "Format" (Detail "': * () ('[] *)")
-                                                   , Node "ContentType" (Detail "()")])
+                                , ("RequestBody", Details $ fromList [ ("Format", Detail "': * () ('[] *)")
+                                                                     , ("ContentType", Detail "()")
+                                                                     ])
 
-                     , Node "StreamBody" (Details [ Node "Format" (Detail "()")
-                                                  , Node "ContentType" (Detail "()")])
+                                , ("StreamBody", Details $ fromList [ ("Format", Detail "()")
+                                                                    , ("ContentType", Detail "()")
+                                                                    ])
 
-                     , Node "RequestType" (Detail "'POST")
+                                , ("RequestType", Detail "'POST")
 
-                     , Node "Response" (Details [ Node "Format" (Detail "': * () ('[] *)")
-                                                , Node "ContentType" (Detail "()")])]
+                                , ("Response", Details $ fromList [ ("Format", Detail "': * () ('[] *)")
+                                                                  , ("ContentType", Detail "()")
+                                                                  ])
+                                ]
 
 type StaticRouteTest = "test_route"
 

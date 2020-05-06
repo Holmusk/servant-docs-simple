@@ -10,7 +10,7 @@ __Example of rendering the intermediate structure__
 
 /Intermediate structure/
 
-> Endpoints [Node "/hello/world"
+> ApiDocs [Node "/hello/world"
 >                 (Details [ Node "RequestBody" (Details [ Node "Format"
 >                                                               (Detail "': * () ('[] *)")
 >                                                        , Node "ContentType"
@@ -54,21 +54,24 @@ __Example of rendering the intermediate structure__
 
 -}
 
-module Servant.Docs.Simple.Render ( Details (..)
-                                  , Endpoints (..)
-                                  , Node (..)
+module Servant.Docs.Simple.Render ( ApiDocs (..)
+                                  , Details (..)
                                   , Renderable (..)
+                                  , Parameter
+                                  , Route
                                   , Json (..)
                                   , Pretty (..)
                                   , PlainText (..)
                                   ) where
 
-import Data.Aeson (ToJSON (..), Value (..), object, (.=))
+import Data.Aeson (ToJSON (..), Value (..))
 import Data.List (intersperse)
 import Data.Text (Text, pack)
 import Data.Text.Prettyprint.Doc (Doc, cat, line, nest, pretty, vcat, vsep)
+import Data.Map.Ordered (OMap, assocs)
+import Data.HashMap.Strict (fromList)
 
--- | Intermediate documentation structure, a linked-list of endpoints (__'Node's__)
+-- | Intermediate documentation structure, a hashmap of endpoints
 --
 -- API type:
 --
@@ -76,9 +79,10 @@ import Data.Text.Prettyprint.Doc (Doc, cat, line, nest, pretty, vcat, vsep)
 -- >                           :<|> "get"    :> Response '[()] ()
 -- >                         )
 --
--- Parsed into Endpoints:
+-- TODO update this example
+-- Parsed into ApiDocs:
 --
--- >   Endpoints [ Node "/users/update"
+-- >   ApiDocs [ Node "/users/update"
 -- >                    (Details [ Node "Response"
 -- >                                    (Details [ Node "Format" (Detail "': * () ('[] *)")
 -- >                                             , Node "ContentType" (Detail "()")
@@ -96,9 +100,13 @@ import Data.Text.Prettyprint.Doc (Doc, cat, line, nest, pretty, vcat, vsep)
 --
 -- For more examples reference [Test.Servant.Docs.Simple.Samples](https://github.com/Holmusk/servant-docs-simple/blob/master/test/Test/Servant/Docs/Simple/Samples.hs)
 --
-newtype Endpoints = Endpoints [Node] deriving stock (Eq, Show)
+newtype ApiDocs = ApiDocs (OMap Route Details) deriving stock (Eq, Show)
 
--- | Key-Value pair for endpoint parameters and their values
+-- | Route representation
+type Route = Text
+
+-- TODO update these examples
+-- | Key-Value pair for endpoints using the route as the key and parameters as the values
 --
 -- __Example 1__
 --
@@ -132,48 +140,55 @@ newtype Endpoints = Endpoints [Node] deriving stock (Eq, Show)
 -- >               ])                                              ---
 --
 
-data Node = Node Text -- ^ Parameter name
-                 Details -- ^ Parameter value(s)
-            deriving stock (Eq, Show)
-
--- | Value representation; see 'Endpoints' and 'Node' documentation for a clearer picture
-data Details = Details [Node] -- ^ List of Parameter-Value pairs
+-- TODO include how this looks
+-- | Details of the Api Route; see 'ApiDocs' documentation for a clearer picture
+data Details = Details (OMap Parameter Details) -- ^ List of Parameter-Value pairs
              | Detail Text    -- ^ Single Value
              deriving stock (Eq, Show)
 
--- | Convert Endpoints into different documentation formats
+-- | Parameter names
+type Parameter = Text
+
+-- | Convert ApiDocs into different documentation formats
 class Renderable a where
-  render :: Endpoints -> a
+    render :: ApiDocs -> a
 
 -- | Conversion to JSON using Data.Aeson
 newtype Json = Json { getJson :: Value } deriving stock (Eq, Show)
+
+-- | Conversion to JSON using Data.Aeson
 instance Renderable Json where
-  render = Json . toJSON
+    render = Json . toJSON
 
-instance ToJSON Endpoints where
-    toJSON (Endpoints endpoints) = toJSON $ Details endpoints
+-- | Json instance for the endpoints hashmap
+instance ToJSON ApiDocs where
+    toJSON (ApiDocs endpoints) = toJSON . fromList . assocs $ endpoints
 
+-- | Json instance for the parameter hashmap of each endpoint
 instance ToJSON Details where
     toJSON (Detail t) = String t
-    toJSON (Details ls) = object . fmap jsonify $ ls
-      where jsonify (Node name details) = name .= toJSON details
+    toJSON (Details ls) = toJSON . fromList . assocs $ ls
 
 -- | Conversion to prettyprint
 newtype Pretty ann = Pretty { getPretty :: Doc ann }
 
+-- | Conversion to prettyprint
 instance Renderable (Pretty ann) where
-  render = Pretty . prettyPrint
+    render = Pretty . prettyPrint
 
-prettyPrint :: Endpoints -> Doc ann
-prettyPrint (Endpoints ls) = vcat . intersperse line $ toDoc 0 <$> ls
+-- | Helper function to prettyprint the ApiDocs
+prettyPrint :: ApiDocs -> Doc ann
+prettyPrint (ApiDocs endpoints) = vcat . intersperse line
+                                $ uncurry (toDoc 0) <$> assocs endpoints
 
-toDoc :: Int -> Node -> Doc ann
-toDoc i (Node t d) = case d of
+-- | Helper function
+toDoc :: Int -> Text -> Details -> Doc ann
+toDoc i t d = case d of
     Detail a   -> cat [pretty t, ": ", pretty a]
     Details as -> nest i . vsep $ pretty t <> ":"
-                                : (toDoc (i + 4) <$> as)
+                                : (uncurry (toDoc (i + 4)) <$> assocs as)
 
 -- | Conversion to plaintext
 newtype PlainText = PlainText { getPlainText :: Text } deriving stock (Eq, Show)
 instance Renderable PlainText where
-  render = PlainText . pack . show . getPretty . render
+    render = PlainText . pack . show . getPretty . render
