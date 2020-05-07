@@ -32,7 +32,7 @@ __Example of parsing an API__
 
 {-# LANGUAGE UndecidableInstances #-}
 
-module Servant.Docs.Simple.Parse (HasParsable (..)) where
+module Servant.Docs.Simple.Parse (HasDocumentApi (..), HasParsable (..)) where
 
 
 import Data.Foldable (fold)
