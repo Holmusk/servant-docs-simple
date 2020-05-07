@@ -22,4 +22,4 @@ documentTree = parse @API
 -- When actually building documentation,
 -- you should pick a suitable Renderable format such as JSON, PlainText etc...
 main :: IO ()
-main = putStrLn $ show documentTree
+main = print documentTree

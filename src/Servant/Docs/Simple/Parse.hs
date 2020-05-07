@@ -42,7 +42,7 @@ module Servant.Docs.Simple.Parse
 
 
 import Data.Foldable (fold)
-import Data.Map.Ordered (OMap, (|<), empty, fromList)
+import Data.Map.Ordered (OMap, empty, fromList, (|<))
 import Data.Proxy
 import Data.Text (Text, pack)
 import Data.Typeable (Typeable, typeRep)
@@ -136,9 +136,9 @@ instance HasDocumentApi b => HasDocumentApi (Vault :> b) where
 -- | Basic authentication documentation
 instance (HasDocumentApi b, KnownSymbol realm, Typeable a) => HasDocumentApi (BasicAuth (realm :: Symbol) a :> b) where
     document r a = document @b r $ a <> [( "Basic Authentication"
-                                        , (toDetails [ ("Realm", Detail realm)
-                                                            , ("UserData", Detail userData)
-                                                            ])
+                                        , toDetails [ ("Realm", Detail realm)
+                                                    , ("UserData", Detail userData)
+                                                    ]
                                         )]
 
         where realm = symbolVal' @realm
@@ -146,53 +146,53 @@ instance (HasDocumentApi b, KnownSymbol realm, Typeable a) => HasDocumentApi (Ba
 
 -- | Authentication documentation
 instance (HasDocumentApi b, KnownSymbol token) => HasDocumentApi (AuthProtect (token :: Symbol) :> b) where
-    document r a = document @b r $ a <> [("Authentication", (Detail authDoc))]
+    document r a = document @b r $ a <> [("Authentication", Detail authDoc)]
         where authDoc = symbolVal' @token
 
 -- | Request header documentation
 instance (HasDocumentApi b, KnownSymbol ct, Typeable typ) => HasDocumentApi (Header' m (ct :: Symbol) typ :> b) where
     document r a = document @b r $ a <> [( "RequestHeaders"
-                                        , (toDetails [ ("Name", Detail $ symbolVal' @ct)
-                                                              , ("ContentType", Detail $ typeText @typ)
-                                                              ])
+                                        , toDetails [ ("Name", Detail $ symbolVal' @ct)
+                                                    , ("ContentType", Detail $ typeText @typ)
+                                                    ]
                                         )]
 
 -- | Query flag documentation
 instance (HasDocumentApi b, KnownSymbol param) => HasDocumentApi (QueryFlag (param :: Symbol) :> b) where
     document r a = document @b r $ a <> [( "QueryFlag"
-                                        , (toDetails [ ("Param", Detail $ symbolVal' @param) ])
+                                        , toDetails [ ("Param", Detail $ symbolVal' @param) ]
                                         )]
 
 -- | Query param documentation
 instance (HasDocumentApi b, KnownSymbol param, Typeable typ) => HasDocumentApi (QueryParam' m (param :: Symbol) typ :> b) where
     document r a = document @b r $ a <> [( "QueryParam"
-                                        , (toDetails [ ("Param", Detail $ symbolVal' @param)
-                                                              , ("ContentType", Detail $ typeText @typ)
-                                                              ])
+                                        , toDetails [ ("Param", Detail $ symbolVal' @param)
+                                                    , ("ContentType", Detail $ typeText @typ)
+                                                    ]
                                         )]
 
 -- | Query params documentation
 instance (HasDocumentApi b, KnownSymbol param, Typeable typ) => HasDocumentApi (QueryParams (param :: Symbol) typ :> b) where
     document r a = document @b r $ a <> [(  "QueryParams"
-                                        ,  (toDetails [ ("Param", Detail $ symbolVal' @param)
-                                                                , ("ContentType", Detail $ typeText @typ)
-                                                                ])
+                                        , toDetails [ ("Param", Detail $ symbolVal' @param)
+                                                    , ("ContentType", Detail $ typeText @typ)
+                                                    ]
                                         )]
 
 -- | Request body documentation
 instance (HasDocumentApi b, Typeable ct, Typeable typ) => HasDocumentApi (ReqBody' m ct typ :> b) where
     document r a = document @b r $ a <> [( "RequestBody"
-                                        , (toDetails [ ("Format", Detail $ typeText @ct)
-                                                              , ("ContentType", Detail $ typeText @typ)
-                                                              ])
+                                        , toDetails [ ("Format", Detail $ typeText @ct)
+                                                    , ("ContentType", Detail $ typeText @typ)
+                                                    ]
                                         )]
 
 -- | Stream body documentation
 instance (HasDocumentApi b, Typeable ct, Typeable typ) => HasDocumentApi (StreamBody' m ct typ :> b) where
     document r a = document @b r $ a <> [( "StreamBody"
-                                        , (toDetails [ ("Format", Detail $ typeText @ct)
-                                                              , ("ContentType", Detail $ typeText @typ)
-                                                              ])
+                                        , toDetails [ ("Format", Detail $ typeText @ct)
+                                                    , ("ContentType", Detail $ typeText @typ)
+                                                    ]
                                         )]
 
 -- | Response documentation
@@ -205,8 +205,8 @@ instance (Typeable m, Typeable ct, Typeable typ) => HasDocumentApi (Verb m s ct 
         where requestType = ("RequestType", Detail $ typeText @m)
               response = ( "Response"
                          , toDetails [ ("Format", Detail $ typeText @ct)
-                                              , ("ContentType", Detail $ typeText @typ)
-                                              ]
+                                     , ("ContentType", Detail $ typeText @typ)
+                                     ]
                          )
 
 -- | Convert parameter-value pairs to Details type

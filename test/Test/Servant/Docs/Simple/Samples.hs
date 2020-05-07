@@ -13,7 +13,7 @@ import Servant.API ((:<|>), (:>), AuthProtect, BasicAuth, Capture, CaptureAll, D
 import Text.RawString.QQ (r)
 
 import Servant.Docs.Simple.Parse (toDetails)
-import Servant.Docs.Simple.Render (Details (..), ApiDocs (..), Json (..), PlainText (..))
+import Servant.Docs.Simple.Render (ApiDocs (..), Details (..), Json (..), PlainText (..))
 
 
 type ApiComplete = StaticRouteTest :> DynRouteTest :> CaptureAllTest :> ApiDetails
@@ -117,10 +117,10 @@ type ApiMultiple = "route1" :> DynRouteTest :> CaptureAllTest :> ApiDetails
               :<|> "route3" :> DynRouteTest :> CaptureAllTest :> ApiDetails
 
 apiMultipleParsed :: ApiDocs
-apiMultipleParsed = ApiDocs $ fromList $ [ ("/route1/{test::()}/{test::()}", apiDetails)
-                                         , ("/route2/{test::()}/{test::()}", apiDetails)
-                                         , ("/route3/{test::()}/{test::()}", apiDetails)
-                                         ]
+apiMultipleParsed = ApiDocs $ fromList [ ("/route1/{test::()}/{test::()}", apiDetails)
+                                       , ("/route2/{test::()}/{test::()}", apiDetails)
+                                       , ("/route3/{test::()}/{test::()}", apiDetails)
+                                       ]
 
 
 type ApiDetails = HttpVersionTest

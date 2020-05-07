@@ -1,7 +1,7 @@
 -- stack --system-ghc runghc --package servant-docs-simple
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE FlexibleInstances   #-}
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE PolyKinds           #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications    #-}
@@ -9,9 +9,9 @@
 
 module Main where
 
+import Data.Proxy (Proxy (..))
 import Data.Text (Text, pack)
 import Data.Typeable (Typeable, typeRep)
-import Data.Proxy (Proxy (..))
 
 import Servant.API ((:>))
 import Servant.Docs.Simple (writeDocsPlainText)

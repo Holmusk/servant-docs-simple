@@ -7,8 +7,8 @@
 
 module Main where
 
-import Data.Text (Text)
 import Data.Map.Ordered (assocs)
+import Data.Text (Text)
 
 import Servant.API ((:>), Post, ReqBody)
 import Servant.Docs.Simple.Parse (parse)
@@ -42,7 +42,7 @@ instance Renderable Documented where
 -- Just mush everything together, just a proof of concept.
 -- Check out Renderable instances in Servant.Docs.Simple.Render for proper implementations
 getInfo :: Details -> Text
-getInfo (Detail t)   = t
+getInfo (Detail t)  = t
 getInfo (Details d) = foldMap (\(t, rest) -> t <> getInfo rest) $ assocs d
 
 -- Rendered data structure
@@ -51,4 +51,4 @@ documented = render documentTree
 
 -- Irrelevant, just to allow compile
 main :: IO ()
-main = putStrLn $ show documented
+main = print documented

@@ -66,11 +66,11 @@ module Servant.Docs.Simple.Render
        ) where
 
 import Data.Aeson (ToJSON (..), Value (..))
+import Data.HashMap.Strict (fromList)
 import Data.List (intersperse)
+import Data.Map.Ordered (OMap, assocs)
 import Data.Text (Text, pack)
 import Data.Text.Prettyprint.Doc (Doc, cat, line, nest, pretty, vcat, vsep)
-import Data.Map.Ordered (OMap, assocs)
-import Data.HashMap.Strict (fromList)
 
 -- | Intermediate documentation structure, a hashmap of endpoints
 --
@@ -167,7 +167,7 @@ instance ToJSON ApiDocs where
 
 -- | Json instance for the parameter hashmap of each endpoint
 instance ToJSON Details where
-    toJSON (Detail t) = String t
+    toJSON (Detail t)   = String t
     toJSON (Details ls) = toJSON . fromList . assocs $ ls
 
 -- | Conversion to prettyprint
