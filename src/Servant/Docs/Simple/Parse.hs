@@ -32,7 +32,11 @@ __Example of parsing an API__
 
 {-# LANGUAGE UndecidableInstances #-}
 
-module Servant.Docs.Simple.Parse (HasDocumentApi (..), HasParsable (..)) where
+module Servant.Docs.Simple.Parse
+       ( HasDocumentApi (..)
+       , HasParsable (..)
+       , toDetails
+       ) where
 
 
 import Data.Foldable (fold)
@@ -130,7 +134,7 @@ instance HasDocumentApi b => HasDocumentApi (Vault :> b) where
 -- | Basic authentication documentation
 instance (HasDocumentApi b, KnownSymbol realm, Typeable a) => HasDocumentApi (BasicAuth (realm :: Symbol) a :> b) where
     document r a = document @b r $ a <> [( "Basic Authentication"
-                                        , (Details $ fromList [ ("Realm", Detail realm)
+                                        , (toDetails [ ("Realm", Detail realm)
                                                             , ("UserData", Detail userData)
                                                             ])
                                         )]
@@ -146,7 +150,7 @@ instance (HasDocumentApi b, KnownSymbol token) => HasDocumentApi (AuthProtect (t
 -- | Request header documentation
 instance (HasDocumentApi b, KnownSymbol ct, Typeable typ) => HasDocumentApi (Header' m (ct :: Symbol) typ :> b) where
     document r a = document @b r $ a <> [( "RequestHeaders"
-                                        , (Details $ fromList [ ("Name", Detail $ symbolVal' @ct)
+                                        , (toDetails [ ("Name", Detail $ symbolVal' @ct)
                                                               , ("ContentType", Detail $ typeText @typ)
                                                               ])
                                         )]
@@ -154,13 +158,13 @@ instance (HasDocumentApi b, KnownSymbol ct, Typeable typ) => HasDocumentApi (Hea
 -- | Query flag documentation
 instance (HasDocumentApi b, KnownSymbol param) => HasDocumentApi (QueryFlag (param :: Symbol) :> b) where
     document r a = document @b r $ a <> [( "QueryFlag"
-                                        , (Details $ fromList [ ("Param", Detail $ symbolVal' @param) ])
+                                        , (toDetails [ ("Param", Detail $ symbolVal' @param) ])
                                         )]
 
 -- | Query param documentation
 instance (HasDocumentApi b, KnownSymbol param, Typeable typ) => HasDocumentApi (QueryParam' m (param :: Symbol) typ :> b) where
     document r a = document @b r $ a <> [( "QueryParam"
-                                        , (Details $ fromList [ ("Param", Detail $ symbolVal' @param)
+                                        , (toDetails [ ("Param", Detail $ symbolVal' @param)
                                                               , ("ContentType", Detail $ typeText @typ)
                                                               ])
                                         )]
@@ -168,7 +172,7 @@ instance (HasDocumentApi b, KnownSymbol param, Typeable typ) => HasDocumentApi (
 -- | Query params documentation
 instance (HasDocumentApi b, KnownSymbol param, Typeable typ) => HasDocumentApi (QueryParams (param :: Symbol) typ :> b) where
     document r a = document @b r $ a <> [(  "QueryParams"
-                                        ,  (Details $ fromList [ ("Param", Detail $ symbolVal' @param)
+                                        ,  (toDetails [ ("Param", Detail $ symbolVal' @param)
                                                                 , ("ContentType", Detail $ typeText @typ)
                                                                 ])
                                         )]
@@ -176,7 +180,7 @@ instance (HasDocumentApi b, KnownSymbol param, Typeable typ) => HasDocumentApi (
 -- | Request body documentation
 instance (HasDocumentApi b, Typeable ct, Typeable typ) => HasDocumentApi (ReqBody' m ct typ :> b) where
     document r a = document @b r $ a <> [( "RequestBody"
-                                        , (Details $ fromList [ ("Format", Detail $ typeText @ct)
+                                        , (toDetails [ ("Format", Detail $ typeText @ct)
                                                               , ("ContentType", Detail $ typeText @typ)
                                                               ])
                                         )]
@@ -184,7 +188,7 @@ instance (HasDocumentApi b, Typeable ct, Typeable typ) => HasDocumentApi (ReqBod
 -- | Stream body documentation
 instance (HasDocumentApi b, Typeable ct, Typeable typ) => HasDocumentApi (StreamBody' m ct typ :> b) where
     document r a = document @b r $ a <> [( "StreamBody"
-                                        , (Details $ fromList [ ("Format", Detail $ typeText @ct)
+                                        , (toDetails [ ("Format", Detail $ typeText @ct)
                                                               , ("ContentType", Detail $ typeText @typ)
                                                               ])
                                         )]
@@ -198,10 +202,14 @@ instance (Typeable m, Typeable ct, Typeable typ) => HasDocumentApi (Verb m s ct 
                    )
         where requestType = ("RequestType", Detail $ typeText @m)
               response = ( "Response"
-                         , Details $ fromList [ ("Format", Detail $ typeText @ct)
+                         , toDetails [ ("Format", Detail $ typeText @ct)
                                               , ("ContentType", Detail $ typeText @typ)
                                               ]
                          )
+
+-- | Convert parameter-value pairs to Details type
+toDetails :: [(Text, Details)] -> Details
+toDetails = Details . fromList
 
 -- | Internal Helper utilities
 typeText :: forall a. (Typeable a) => Text

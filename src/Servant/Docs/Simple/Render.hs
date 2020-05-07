@@ -54,15 +54,16 @@ __Example of rendering the intermediate structure__
 
 -}
 
-module Servant.Docs.Simple.Render ( ApiDocs (..)
-                                  , Details (..)
-                                  , Renderable (..)
-                                  , Parameter
-                                  , Route
-                                  , Json (..)
-                                  , Pretty (..)
-                                  , PlainText (..)
-                                  ) where
+module Servant.Docs.Simple.Render
+       ( ApiDocs (..)
+       , Details (..)
+       , Renderable (..)
+       , Parameter
+       , Route
+       , Json (..)
+       , Pretty (..)
+       , PlainText (..)
+       ) where
 
 import Data.Aeson (ToJSON (..), Value (..))
 import Data.List (intersperse)

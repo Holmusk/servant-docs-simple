@@ -12,6 +12,7 @@ import Servant.API ((:<|>), (:>), AuthProtect, BasicAuth, Capture, CaptureAll, D
 
 import Text.RawString.QQ (r)
 
+import Servant.Docs.Simple.Parse (toDetails)
 import Servant.Docs.Simple.Render (Details (..), ApiDocs (..), Json (..), PlainText (..))
 
 
@@ -139,45 +140,45 @@ type ApiDetails = HttpVersionTest
                :> ResponseTest
 
 apiDetails :: Details
-apiDetails = Details $ fromList [ ("Captures Http Version", Detail "True")
+apiDetails = toDetails [ ("Captures Http Version", Detail "True")
                                 , ("SSL Only", Detail "True")
                                 , ("Captures RemoteHost/IP", Detail "True")
                                 , ("Description", Detail "sampleText")
                                 , ("Summary", Detail "sampleText")
                                 , ("Vault", Detail "True")
-                                , ("Basic Authentication", Details $ fromList [ ("Realm", Detail "local")
-                                                                              , ("UserData", Detail "()")
-                                                                              ])
+                                , ("Basic Authentication", toDetails [ ("Realm", Detail "local")
+                                                                     , ("UserData", Detail "()")
+                                                                     ])
 
                                 , ("Authentication", Detail "TEST_JWT")
 
-                                , ("RequestHeaders", Details $ fromList [ ("Name", Detail "test")
+                                , ("RequestHeaders", toDetails [ ("Name", Detail "test")
                                                                         , ("ContentType", Detail "()")
                                                                         ])
 
                                 , ("QueryFlag", Details $ curry singleton "Param" (Detail "test"))
 
-                                , ("QueryParam", Details $ fromList [ ("Param", Detail "test")
-                                                                    , ("ContentType", Detail "()")
-                                                                    ])
+                                , ("QueryParam", toDetails [ ("Param", Detail "test")
+                                                           , ("ContentType", Detail "()")
+                                                           ])
 
-                                , ("QueryParams", Details $ fromList [ ("Param", Detail "test")
-                                                                     , ("ContentType", Detail "()")
-                                                                     ])
+                                , ("QueryParams", toDetails [ ("Param", Detail "test")
+                                                            , ("ContentType", Detail "()")
+                                                            ])
 
-                                , ("RequestBody", Details $ fromList [ ("Format", Detail "': * () ('[] *)")
-                                                                     , ("ContentType", Detail "()")
-                                                                     ])
+                                , ("RequestBody", toDetails [ ("Format", Detail "': * () ('[] *)")
+                                                            , ("ContentType", Detail "()")
+                                                            ])
 
-                                , ("StreamBody", Details $ fromList [ ("Format", Detail "()")
-                                                                    , ("ContentType", Detail "()")
-                                                                    ])
+                                , ("StreamBody", toDetails [ ("Format", Detail "()")
+                                                           , ("ContentType", Detail "()")
+                                                           ])
 
                                 , ("RequestType", Detail "'POST")
 
-                                , ("Response", Details $ fromList [ ("Format", Detail "': * () ('[] *)")
-                                                                  , ("ContentType", Detail "()")
-                                                                  ])
+                                , ("Response", toDetails [ ("Format", Detail "': * () ('[] *)")
+                                                         , ("ContentType", Detail "()")
+                                                         ])
                                 ]
 
 type StaticRouteTest = "test_route"
