@@ -2,9 +2,7 @@
 
 __Example script__
 
-[Writing documentation to file](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/parse.hs)
-
-__Using this script__
+[Writing documentation to file](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/generate.hs)
 
 /With the following language extensions/
 
@@ -12,16 +10,12 @@ __Using this script__
 > TypeApplications
 > TypeOperators
 
+/Using this script/
 
 > module Main where
 >
-> import Data.Aeson (Value)
-> import Data.Text (Text)
->
 > import Servant.API ((:>), Post, ReqBody)
-> import Servant.Docs.Simple (document, documentWith, stdoutJson, stdoutPlainText, writeDocsJson,
->                             writeDocsPlainText)
-> import Servant.Docs.Simple.Render (Json (..), PlainText (..))
+> import Servant.Docs.Simple (writeDocsJson, writeDocsPlainText)
 >
 > -- Our API type
 > type API = "hello" :> "world" :> Request :> Response

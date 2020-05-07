@@ -2,27 +2,38 @@
 
 __Example scripts__
 
-[Generating plaintext/JSON documentation from api types](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/render.hs)
+[Generating plaintext/JSON documentation from api types](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/generate.hs)
 
-[Writing our own rendering format](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/format.hs)
+[Writing our own rendering format](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/render.hs)
 
 __Example of rendering the intermediate structure__
 
 /Intermediate structure/
 
-> ApiDocs [Node "/hello/world"
->                 (Details [ Node "RequestBody" (Details [ Node "Format"
->                                                               (Detail "': * () ('[] *)")
->                                                        , Node "ContentType"
->                                                               (Detail "()")
->                                                        ])
->                          , Node "RequestType" (Detail "'POST")
->                          , Node "Response" (Details [ Node "Format"
->                                                            (Detail "': * () ('[] *)")
->                                                     , Node "ContentType"
->                                                            (Detail "()")
->                                                     ])
->                          ])]
+> ApiDocs ( fromList [( "/hello/world",
+>                     , Details (fromList ([ ( "RequestBody"
+>                                            , Details (fromList ([ ( "Format"
+>                                                                   , Detail "': * () ('[] *)"
+>                                                                   )
+>                                                                 , ( "ContentType"
+>                                                                   , Detail "()"
+>                                                                   )
+>                                                                 ]))
+>                                            )
+>                                          , ( "RequestType"
+>                                            , Detail "'POST"
+>                                            )
+>                                          , ( "Response"
+>                                            , Details (fromList ([ ( "Format"
+>                                                                   , Detail "': * () ('[] *)"
+>                                                                   )
+>                                                                 , ( "ContentType"
+>                                                                   , Detail "()"
+>                                                                   )
+>                                                                 ]))
+>                                            )
+>                                          ]))
+>                     )])
 
 
 /JSON/
@@ -80,24 +91,34 @@ import Data.Text.Prettyprint.Doc (Doc, cat, line, nest, pretty, vcat, vsep)
 -- >                           :<|> "get"    :> Response '[()] ()
 -- >                         )
 --
--- TODO update this example
 -- Parsed into ApiDocs:
 --
--- >   ApiDocs [ Node "/users/update"
--- >                    (Details [ Node "Response"
--- >                                    (Details [ Node "Format" (Detail "': * () ('[] *)")
--- >                                             , Node "ContentType" (Detail "()")
--- >                                             ])
--- >                             ])
--- >             , Node "/users/get"
--- >                    (Details [ Node "Response"
--- >                                    (Details [ Node "Format" (Detail "': * () ('[] *)")
--- >                                             , Node "ContentType" (Detail "()")
--- >                                             ])
--- >                             ])
--- >             ]
 --
--- For a breakdown reference 'Node'
+-- > ApiDocs ( fromList [ ( "/users/update",
+-- >                      , Details (fromList ([ ( "Response"
+-- >                                             , Details (fromList ([ ( "Format"
+-- >                                                                    , Detail "': * () ('[] *)"
+-- >                                                                    )
+-- >                                                                  , ( "ContentType"
+-- >                                                                    , Detail "()"
+-- >                                                                    )
+-- >                                                                 ]))
+-- >                                             )
+-- >                                           ]))
+-- >                      )
+-- >                    , ( "/users/get",
+-- >                      , Details (fromList ([ ( "Response"
+-- >                                             , Details (fromList ([ ( "Format"
+-- >                                                                    , Detail "': * () ('[] *)"
+-- >                                                                    )
+-- >                                                                  , ( "ContentType"
+-- >                                                                    , Detail "()"
+-- >                                                                    )
+-- >                                                                  ]))
+-- >                                             )
+-- >                                           ]))
+-- >                     )
+-- >                    ])
 --
 -- For more examples reference [Test.Servant.Docs.Simple.Samples](https://github.com/Holmusk/servant-docs-simple/blob/master/test/Test/Servant/Docs/Simple/Samples.hs)
 --
@@ -106,44 +127,21 @@ newtype ApiDocs = ApiDocs (OMap Route Details) deriving stock (Eq, Show)
 -- | Route representation
 type Route = Text
 
--- TODO update these examples
--- | Key-Value pair for endpoints using the route as the key and parameters as the values
+-- | Details of the Api Route
 --
--- __Example 1__
+-- __Examples__
 --
--- An endpoint is represented as a node, with the route as its parameter and its Details as its value
+-- > Authentication: true
 --
--- > Node "/users/get" <Details>
+-- Can be interpreted as a Parameter (Authentication) and a /Detail/ (true)
 --
--- __Example 2__
+-- > Response:
+-- >   Format: ...
+-- >   ContentType: ...
 --
--- Details of each endpoint can also be represented as nodes
+-- Can be interpreted as a Parameter (Response) and /Details/ (Format (...), ContentType (...))
 --
--- Given the following:
---
--- > Response '[()] ()
---
--- This can be interpreted as a Response parameter, with a value of 2 Details, Format and ContentType
---
--- In turn, this:
---
--- > Format: '[()]
---
--- can be interpreted as a Format parameter with a value of @'[()]@.
---
--- And so parsing @Response '[()] ()@ comes together as:
---
--- > Node "Response"                                               --- Parameter
--- >      (Details [ Node "Format"                   -- Parameter  ---
--- >                      (Detail "': * () ('[] *)") -- Value         |
--- >               , Node "ContentType"              -- Parameter     | Value
--- >                      (Detail "()")              -- Value         |
--- >               ])                                              ---
---
-
--- TODO include how this looks
--- | Details of the Api Route; see 'ApiDocs' documentation for a clearer picture
-data Details = Details (OMap Parameter Details) -- ^ List of Parameter-Value pairs
+data Details = Details (OMap Parameter Details) -- ^ OMap of Parameter-Details
              | Detail Text    -- ^ Single Value
              deriving stock (Eq, Show)
 
@@ -191,5 +189,7 @@ toDoc i t d = case d of
 
 -- | Conversion to plaintext
 newtype PlainText = PlainText { getPlainText :: Text } deriving stock (Eq, Show)
+
+-- | Conversion to plaintext
 instance Renderable PlainText where
     render = PlainText . pack . show . getPretty . render

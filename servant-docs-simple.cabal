@@ -1,11 +1,12 @@
 cabal-version:       2.4
 name:                servant-docs-simple
 version:             0.2.0.0
-synopsis:            Generate documentation via TypeRep for Servant API
+synopsis:            Generate endpoints overview for Servant API
 
 description:
     This library uses [Data.Typeable](http://hackage.haskell.org/package/base-4.12.0.0/docs/Data-Typeable.html)
     to generate documentation for [Servant](https://hackage.haskell.org/package/servant) API types.
+
 
     It relies on the `typeRep` of Servant's combinators and other datatypes used in
     the API to generate the documentation.

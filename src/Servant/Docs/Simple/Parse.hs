@@ -4,6 +4,8 @@ __Example script__
 
 [Generating the intermediate documentation structure](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/parse.hs)
 
+[Parsing custom API type combinators](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/custom.hs)
+
 __Example of parsing an API__
 
 /API type/
@@ -14,19 +16,30 @@ __Example of parsing an API__
 
 /Intermediate structure/
 
-> Endpoints [Node "/hello/world"
->                 (Details [ Node "RequestBody" (Details [ Node "Format"
->                                                               (Detail "': * () ('[] *)")
->                                                        , Node "ContentType"
->                                                               (Detail "()")
->                                                        ])
->                          , Node "RequestType" (Detail "'POST")
->                          , Node "Response" (Details [ Node "Format"
->                                                            (Detail "': * () ('[] *)")
->                                                     , Node "ContentType"
->                                                            (Detail "()")
->                                                     ])
->                          ])]
+> ApiDocs ( fromList [( "/hello/world",
+>                     , Details (fromList ([ ( "RequestBody"
+>                                            , Details (fromList ([ ( "Format"
+>                                                                   , Detail "': * () ('[] *)"
+>                                                                   )
+>                                                                 , ( "ContentType"
+>                                                                   , Detail "()"
+>                                                                   )
+>                                                                 ]))
+>                                            )
+>                                          , ( "RequestType"
+>                                            , Detail "'POST"
+>                                            )
+>                                          , ( "Response"
+>                                            , Details (fromList ([ ( "Format"
+>                                                                   , Detail "': * () ('[] *)"
+>                                                                   )
+>                                                                 , ( "ContentType"
+>                                                                   , Detail "()"
+>                                                                   )
+>                                                                 ]))
+>                                            )
+>                                          ]))
+>                     )])
 
 -}
 
@@ -55,13 +68,15 @@ import qualified Servant.API.TypeLevel as S (Endpoints)
 
 import Servant.Docs.Simple.Render (ApiDocs (..), Details (..), Parameter, Route)
 
--- | Flattens API into type level list of 'Endpoints'
+-- | Flattens API into type level list of Endpoints
 class HasParsable api where
     parse :: ApiDocs
 
+-- | If the flattened API can be collated into documentation, it is parsable
 instance HasCollatable (S.Endpoints a) => HasParsable a where
     parse = collate @(S.Endpoints a)
 
+-- | Empty APIs should have no documentation
 instance {-# OVERLAPPING #-} HasParsable EmptyAPI where
     parse = collate @'[]
 
@@ -70,10 +85,12 @@ class HasCollatable api where
     -- | Folds list of endpoints to documentation
     collate :: ApiDocs
 
+-- | Collapse a type-level list of API endpoints into documentation
 instance (HasDocumentApi api, HasCollatable b) => HasCollatable (api ': b) where
     collate = ApiDocs $ (Details <$> documentEndpoint @api) |< previous
       where ApiDocs previous = collate @b
 
+-- | Terminal step when there are no more endpoints left to recurse over
 instance HasCollatable '[] where
     collate = ApiDocs empty
 

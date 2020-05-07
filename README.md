@@ -11,6 +11,7 @@
 This library uses [Data.Typeable](http://hackage.haskell.org/package/base-4.12.0.0/docs/Data-Typeable.html)
 to generate documentation for [Servant](https://hackage.haskell.org/package/servant) API types.
 
+
 It relies on the `typeRep` of Servant's combinators and other datatypes used in
 the API to generate the documentation.
 
@@ -18,10 +19,10 @@ the API to generate the documentation.
 
 
 1) We need the `API Format types` inside the documentation. They can be used as keys
-while querying an API endpoint, to look up examples, fields, and other
-miscellaneous details.
+   to look up examples, fields, and other miscellaneous details.
 
-2) We want to generate documentation from the information our `API` type provides, without having to write instances.
+2) We want to generate an overview of our endpoints from the information our
+   `API` type provides, without having to write instances.
 
 [**In-depth explanation here**](https://github.com/Holmusk/servant-docs-simple#faq)
 
@@ -123,7 +124,7 @@ stack examples/<source file>
 
 **What's the usecase for this?**
 
-1) Lightweight documentation solution.
+1) Lightweight documentation solution by providing an overview of endpoints.
 
 2) Keeping documentation for types in one place
 
