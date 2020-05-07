@@ -35,7 +35,9 @@ __Example of parsing an API__
 module Servant.Docs.Simple.Parse
        ( HasDocumentApi (..)
        , HasParsable (..)
+       , symbolVal'
        , toDetails
+       , typeText
        ) where
 
 
@@ -211,9 +213,10 @@ instance (Typeable m, Typeable ct, Typeable typ) => HasDocumentApi (Verb m s ct 
 toDetails :: [(Text, Details)] -> Details
 toDetails = Details . fromList
 
--- | Internal Helper utilities
+-- | Convert types to Text
 typeText :: forall a. (Typeable a) => Text
 typeText = pack . show . typeRep $ Proxy @a
 
+-- | Convert symbol to Text
 symbolVal' :: forall n. KnownSymbol n => Text
 symbolVal' = pack . symbolVal $ Proxy @n

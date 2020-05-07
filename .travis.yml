@@ -50,8 +50,9 @@ script:
       cabal v2-test --enable-tests
     else
       stack test --system-ghc
+      stack examples/custom.hs
       stack examples/example.hs
-      stack examples/format.hs
+      stack examples/generate.hs
       stack examples/parse.hs
       stack examples/render.hs
     fi

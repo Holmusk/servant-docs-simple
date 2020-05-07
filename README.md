@@ -38,13 +38,8 @@ miscellaneous details.
 
 module Main where
 
-import Data.Aeson (Value)
-import Data.Text (Text)
-
 import Servant.API ((:>), Post, ReqBody)
-import Servant.Docs.Simple (document, documentWith, stdoutJson, stdoutPlainText, writeDocsJson,
-                            writeDocsPlainText)
-import Servant.Docs.Simple.Render (Json (..), PlainText (..))
+import Servant.Docs.Simple (writeDocsJson, rriteDocsPlainText)
 
 -- Our API type
 type API = "hello" :> "world" :> Request :> Response
@@ -57,7 +52,8 @@ main = do
   writeDocsJson @API "docs.json"
 
   -- Writes to the file $PWD/docsPlainText
-  writeDocsPlainText @API "docs.txt" 
+  writeDocsPlainText @API "docs.txt"
+
 ```
 
 **Expected Output**
@@ -105,11 +101,13 @@ Response:
 
 **Click on these links for tutorials**
 
-[Generating plaintext/JSON documentation from api types](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/render.hs)
+[Generating plaintext/JSON documentation from api types](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/generate.hs)
 
 [Generating the intermediate documentation structure](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/parse.hs)
 
-[Writing our own rendering format](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/format.hs)
+[Writing our own rendering format](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/render.hs)
+
+[Parsing custom API combinators](https://github.com/Holmusk/servant-docs-simple/blob/master/examples/custom.hs)
 
 **To run tutorial scripts**
 

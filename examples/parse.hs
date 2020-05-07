@@ -7,7 +7,7 @@ module Main where
 
 import Servant.API ((:>), Post, ReqBody)
 import Servant.Docs.Simple.Parse (parse)
-import Servant.Docs.Simple.Render (Endpoints (..))
+import Servant.Docs.Simple.Render (ApiDocs (..))
 
 -- Our API type
 type API = "hello" :> "world" :> Request :> Response
@@ -15,9 +15,11 @@ type Request = ReqBody '[()] ()
 type Response = Post '[()] ()
 
 -- Intermediate documentation structure
-documentTree :: Endpoints
+documentTree :: ApiDocs
 documentTree = parse @API
 
--- Irrelevant, just to allow compile
+-- Raw output of the documentation structure.
+-- When actually building documentation,
+-- you should pick a suitable Renderable format such as JSON, PlainText etc...
 main :: IO ()
-main = putStrLn "hello world"
+main = putStrLn $ show documentTree

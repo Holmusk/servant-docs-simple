@@ -1,37 +1,54 @@
 -- stack --system-ghc runghc --package servant-docs-simple
+-- You may reference Renderable instances in Servant.Docs.Simple.Render for more examples
+
 {-# LANGUAGE DataKinds        #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators    #-}
 
-
 module Main where
 
-import Data.Aeson (Value)
 import Data.Text (Text)
+import Data.Map.Ordered (assocs)
 
 import Servant.API ((:>), Post, ReqBody)
-import Servant.Docs.Simple (document, documentWith, stdoutJson, stdoutPlainText, writeDocsJson,
-                            writeDocsPlainText)
-import Servant.Docs.Simple.Render (Json (..), PlainText (..))
+import Servant.Docs.Simple.Parse (parse)
+import Servant.Docs.Simple.Render (ApiDocs (..), Details (..), Renderable (..))
 
 -- Our API type
 type API = "hello" :> "world" :> Request :> Response
 type Request = ReqBody '[()] ()
 type Response = Post '[()] ()
 
--- Render API as Text documentation
-documentText :: Text
-documentText = getPlainText $ document @API
+-- Intermediate documentation structure
+documentTree :: ApiDocs
+documentTree = parse @API
 
--- Render API as Json documentation, represented using Data.Aeson
-documentJson :: Value
-documentJson = getJson $ documentWith @API @Json
+-- Our custom datatype which we would like to render to
+newtype Documented = Documented [Endpt] deriving Show -- A list of documentation for all endpoints
 
+-- Each endpoint consists of
+-- Route: (/users/data, /<route name>, etc...)
+-- Information: (headers, request, response etc..)
+data Endpt = Endpt Route Information deriving Show
+type Route = Text
+type Information = Text
+
+-- Allow us to render the documentTree in our custom data type
+instance Renderable Documented where
+  render (ApiDocs a) = Documented a'
+    where a' = convert <$> assocs a
+          convert (route, info) = Endpt route (getInfo info)
+
+-- Just mush everything together, just a proof of concept.
+-- Check out Renderable instances in Servant.Docs.Simple.Render for proper implementations
+getInfo :: Details -> Text
+getInfo (Detail t)   = t
+getInfo (Details d) = foldMap (\(t, rest) -> t <> getInfo rest) $ assocs d
+
+-- Rendered data structure
+documented :: Documented
+documented = render documentTree
+
+-- Irrelevant, just to allow compile
 main :: IO ()
-main = do
-  stdoutPlainText @API               -- Writes documentation as PlainText to stdout
-  putStrLn "\n"
-  stdoutJson @API                    -- Writes documentation as Json to stdout
-
-  writeDocsJson @API "docsJson"           -- Writes to the file $PWD/docsJson
-  writeDocsPlainText @API "docsPlainText" -- Writes to the file $PWD/docsPlainText
+main = putStrLn $ show documented

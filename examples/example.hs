@@ -6,13 +6,8 @@
 
 module Main where
 
-import Data.Aeson (Value)
-import Data.Text (Text)
-
 import Servant.API ((:>), Post, ReqBody)
-import Servant.Docs.Simple (document, documentWith, stdoutJson, stdoutPlainText, writeDocsJson,
-                            writeDocsPlainText)
-import Servant.Docs.Simple.Render (Json (..), PlainText (..))
+import Servant.Docs.Simple (writeDocsJson, writeDocsPlainText)
 
 -- Our API type
 type API = "hello" :> "world" :> Request :> Response
