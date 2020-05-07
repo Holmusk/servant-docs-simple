@@ -1,11 +1,13 @@
 # Changelog
 
-`servant-docs-simple` uses [PVP Versioning][1].
-The changelog is available [on GitHub][2].
+[The latest version of this document is on GitHub.](https://github.com/Holmusk/servant-docs-simple/blob/master/CHANGELOG.md)
 
 ## 0.1.0.0
 
 * Initially created.
 
-[1]: https://pvp.haskell.org
-[2]: https://github.com/Holmusk/servant-docs-simple/releases
+## 0.2.0.0
+
+* Use OMap as underlying representation for intermediate documentation structure. 
+
+* Expose HasDocumentApi typeclass to allow custom API type combinator parsing.
