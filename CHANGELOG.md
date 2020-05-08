@@ -11,3 +11,7 @@
 * Use OMap as underlying representation for intermediate documentation structure. 
 
 * Expose HasDocumentApi typeclass to allow custom API type combinator parsing.
+
+## 0.2.0.1
+
+* Update CHANGELOG, README

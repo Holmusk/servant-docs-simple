@@ -26,6 +26,8 @@ the API to generate the documentation.
 
 [**In-depth explanation here**](https://github.com/Holmusk/servant-docs-simple#faq)
 
+[**Tutorials**](https://github.com/Holmusk/servant-docs-simple#tutorials)
+
 # Example usage
 
 **Using this script**
@@ -166,9 +168,9 @@ extra instances for each **format type** we use.
    This is so we can index our library with these types to get the relevant
    fields, examples for these.
 
-**Why don't we use Servant.Docs?**
+**How does our usecase differ from Servant.Docs?**
 
-1) `Servant.Docs` generates documentation **only if** `Format Types` have
+1) `Servant.Docs` generates documentation only if `Format Types` have
   implemented the necessary instances.
 
     ``` haskell
