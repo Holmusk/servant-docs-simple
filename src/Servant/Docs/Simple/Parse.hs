@@ -55,6 +55,8 @@ module Servant.Docs.Simple.Parse
 
 
 import Data.Foldable (fold)
+import Data.Kind (Type)
+import Data.List (intersperse)
 import Data.Map.Ordered (OMap, empty, fromList, (|<))
 import Data.Proxy
 import Data.Text (Text, pack)
@@ -63,7 +65,7 @@ import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 
 import Servant.API ((:>), AuthProtect, BasicAuth, Capture', CaptureAll, Description, EmptyAPI,
                     Header', HttpVersion, IsSecure, QueryFlag, QueryParam', QueryParams, RemoteHost,
-                    ReqBody', StreamBody', Summary, Vault, Verb)
+                    ReqBody', StdMethod, StreamBody', Summary, Vault, Verb)
 import qualified Servant.API.TypeLevel as S (Endpoints)
 
 import Servant.Docs.Simple.Render (ApiDocs (..), Details (..), Parameter, Route)
@@ -167,7 +169,7 @@ instance (HasParsableEndpoint b, KnownSymbol token) => HasParsableEndpoint (Auth
         where authDoc = symbolVal' @token
 
 -- | Request header documentation
-instance (HasParsableEndpoint b, KnownSymbol ct, Typeable typ) => HasParsableEndpoint (Header' m (ct :: Symbol) typ :> b) where
+instance (HasParsableEndpoint b, KnownSymbol ct, HasTypeText typ) => HasParsableEndpoint (Header' m (ct :: Symbol) typ :> b) where
     parseEndpoint r a = parseEndpoint @b r $ a <> [( "RequestHeaders"
                                         , toDetails [ ("Name", Detail $ symbolVal' @ct)
                                                     , ("ContentType", Detail $ typeText @typ)
@@ -181,7 +183,7 @@ instance (HasParsableEndpoint b, KnownSymbol param) => HasParsableEndpoint (Quer
                                         )]
 
 -- | Query param documentation
-instance (HasParsableEndpoint b, KnownSymbol param, Typeable typ) => HasParsableEndpoint (QueryParam' m (param :: Symbol) typ :> b) where
+instance (HasParsableEndpoint b, KnownSymbol param, HasTypeText typ) => HasParsableEndpoint (QueryParam' m (param :: Symbol) typ :> b) where
     parseEndpoint r a = parseEndpoint @b r $ a <> [( "QueryParam"
                                         , toDetails [ ("Param", Detail $ symbolVal' @param)
                                                     , ("ContentType", Detail $ typeText @typ)
@@ -189,7 +191,7 @@ instance (HasParsableEndpoint b, KnownSymbol param, Typeable typ) => HasParsable
                                         )]
 
 -- | Query params documentation
-instance (HasParsableEndpoint b, KnownSymbol param, Typeable typ) => HasParsableEndpoint (QueryParams (param :: Symbol) typ :> b) where
+instance (HasParsableEndpoint b, KnownSymbol param, HasTypeText typ) => HasParsableEndpoint (QueryParams (param :: Symbol) typ :> b) where
     parseEndpoint r a = parseEndpoint @b r $ a <> [(  "QueryParams"
                                         , toDetails [ ("Param", Detail $ symbolVal' @param)
                                                     , ("ContentType", Detail $ typeText @typ)
@@ -197,7 +199,7 @@ instance (HasParsableEndpoint b, KnownSymbol param, Typeable typ) => HasParsable
                                         )]
 
 -- | Request body documentation
-instance (HasParsableEndpoint b, Typeable ct, Typeable typ) => HasParsableEndpoint (ReqBody' m ct typ :> b) where
+instance (HasParsableEndpoint b, HasTypeText ct, Typeable typ) => HasParsableEndpoint (ReqBody' m ct typ :> b) where
     parseEndpoint r a = parseEndpoint @b r $ a <> [( "RequestBody"
                                         , toDetails [ ("Format", Detail $ typeText @ct)
                                                     , ("ContentType", Detail $ typeText @typ)
@@ -205,7 +207,7 @@ instance (HasParsableEndpoint b, Typeable ct, Typeable typ) => HasParsableEndpoi
                                         )]
 
 -- | Stream body documentation
-instance (HasParsableEndpoint b, Typeable ct, Typeable typ) => HasParsableEndpoint (StreamBody' m ct typ :> b) where
+instance (HasParsableEndpoint b, HasTypeText ct, Typeable typ) => HasParsableEndpoint (StreamBody' m ct typ :> b) where
     parseEndpoint r a = parseEndpoint @b r $ a <> [( "StreamBody"
                                         , toDetails [ ("Format", Detail $ typeText @ct)
                                                     , ("ContentType", Detail $ typeText @typ)
@@ -215,7 +217,7 @@ instance (HasParsableEndpoint b, Typeable ct, Typeable typ) => HasParsableEndpoi
 -- | Response documentation
 --   Terminates here as responses are last parts of api endpoints
 --   Note that request type information (GET, POST etc...) is contained here
-instance (Typeable m, Typeable ct, Typeable typ) => HasParsableEndpoint (Verb m s ct typ) where
+instance (HasTypeText m, HasTypeText ct, Typeable typ) => HasParsableEndpoint (Verb m s ct typ) where
     parseEndpoint r a = ( r
                    , fromList $ a <> [requestType, response]
                    )
@@ -226,14 +228,43 @@ instance (Typeable m, Typeable ct, Typeable typ) => HasParsableEndpoint (Verb m 
                                      ]
                          )
 
+
 -- | Convert parameter-value pairs to Details type
 toDetails :: [(Text, Details)] -> Details
 toDetails = Details . fromList
 
--- | Convert types to Text
-typeText :: forall a. (Typeable a) => Text
-typeText = pack . show . typeRep $ Proxy @a
-
 -- | Convert symbol to Text
 symbolVal' :: forall n. KnownSymbol n => Text
 symbolVal' = pack . symbolVal $ Proxy @n
+
+-- | Convert types to Text
+class HasTypeText t where
+    -- | Convert types to Text
+    typeText :: Text
+
+instance HasTypeText ('[] :: [Type]) where
+    typeText = ""
+
+instance (HasListText t) => HasTypeText (t :: [Type]) where
+    typeText = listText @t []
+
+instance Typeable t => HasTypeText (t :: Type) where
+    typeText = pack . show . typeRep $ Proxy @t
+
+instance Typeable t => HasTypeText (t :: StdMethod) where
+    typeText = pack . show . typeRep $ Proxy @t
+
+-- | Prettyprint type-level lists
+class HasListText t where
+    -- | Convert type-lists to Text
+    listText :: [Text]
+             -> Text
+
+instance HasListText ('[] :: [Type]) where
+    listText ts = "[" <> fold (intersperse ", " ts) <> "]"
+
+instance (HasTypeText t, HasListText ts) => HasListText ((t ': ts) :: [Type]) where
+    listText tx = listText @ts $ tx <> [typeText @t]
+
+-- TODO Expose the typeText interface
+-- Update tests
