@@ -70,8 +70,10 @@ __Expected Output__
 module Servant.Docs.Simple ( document
                            , documentWith
                            , stdoutJson
+                           , stdoutMarkdown
                            , stdoutPlainText
                            , writeDocsJson
+                           , writeDocsMarkdown
                            , writeDocsPlainText
                            ) where
 
@@ -81,12 +83,16 @@ import qualified Data.ByteString.Lazy.Char8 as BC (putStrLn)
 import qualified Data.Text.IO as T (putStrLn, writeFile)
 
 import Servant.Docs.Simple.Parse (HasParsableApi (..))
-import Servant.Docs.Simple.Render (Json (..), PlainText (..), Renderable (..))
+import Servant.Docs.Simple.Render (Json (..), Markdown (..), PlainText (..), Renderable (..))
 
 
 -- | Write documentation as PlainText to file
 writeDocsPlainText :: forall api. HasParsableApi api => FilePath -> IO ()
 writeDocsPlainText fp = T.writeFile fp . getPlainText $ document @api
+
+-- | Write documentation as Markdown to file
+writeDocsMarkdown :: forall api. HasParsableApi api => FilePath -> IO ()
+writeDocsMarkdown fp = T.writeFile fp . getMarkdown $ documentWith @api @Markdown
 
 -- | Write documentation as JSON to file
 writeDocsJson :: forall api. HasParsableApi api => FilePath -> IO ()
@@ -95,6 +101,10 @@ writeDocsJson fp = B.writeFile fp . encodePretty . getJson $ documentWith @api @
 -- | Write documentation as PlainText to stdout
 stdoutPlainText :: forall api. HasParsableApi api => IO ()
 stdoutPlainText = T.putStrLn . getPlainText $ document @api
+
+-- | Write documentation as Markdown to stdout
+stdoutMarkdown :: forall api. HasParsableApi api => IO ()
+stdoutMarkdown = T.putStrLn . getMarkdown $ documentWith @api @Markdown
 
 -- | Write documentation as JSON to stdout
 stdoutJson :: forall api. HasParsableApi api => IO ()

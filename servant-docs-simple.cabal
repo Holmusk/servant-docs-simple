@@ -63,6 +63,7 @@ common common-options
                        DerivingStrategies
                        FlexibleInstances
                        FunctionalDependencies
+                       LambdaCase
                        OverloadedStrings
                        PolyKinds
                        ScopedTypeVariables
