@@ -10,15 +10,15 @@ import Test.Hspec (Spec, describe, it, shouldBe)
 import Test.Servant.Docs.Simple.Samples (ApiComplete, ApiMultiple, apiCompleteParsed,
                                          apiMultipleParsed)
 
-import Servant.Docs.Simple.Parse (parse)
+import Servant.Docs.Simple.Parse (parseApi)
 import Servant.Docs.Simple.Render (ApiDocs (..))
 
 
 parseSpec :: Spec
 parseSpec = describe "Parses API to Document Tree" $ do
     it "parses an EmptyAPI Details" $
-        parse @EmptyAPI `shouldBe` ApiDocs empty
+        parseApi @EmptyAPI `shouldBe` ApiDocs empty
     it "parses all Servant API Combinators" $
-        parse @ApiComplete `shouldBe` apiCompleteParsed
+        parseApi @ApiComplete `shouldBe` apiCompleteParsed
     it "parses an API with multiple endpoints" $
-        parse @ApiMultiple `shouldBe` apiMultipleParsed
+        parseApi @ApiMultiple `shouldBe` apiMultipleParsed

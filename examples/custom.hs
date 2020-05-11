@@ -15,18 +15,18 @@ import Data.Typeable (Typeable, typeRep)
 
 import Servant.API ((:>))
 import Servant.Docs.Simple (writeDocsPlainText)
-import Servant.Docs.Simple.Parse (HasDocumentApi (..), toDetails, typeText)
+import Servant.Docs.Simple.Parse (HasParsableEndpoint (..), toDetails, typeText)
 import Servant.Docs.Simple.Render (Details (..))
 
 data CustomCombinator a b
 
 -- CustomCombinator documentation
-instance (HasDocumentApi rest, Typeable a, Typeable b) => HasDocumentApi (CustomCombinator a b :> rest) where
-    document r a = document @rest r $ a <> [("CustomCombinator"
-                                            , toDetails [ ("Param A", Detail $ typeText @a)
-                                                        , ("Param B", Detail $ typeText @b)
-                                                        ]
-                                            )]
+instance (HasParsableEndpoint rest, Typeable a, Typeable b) => HasParsableEndpoint (CustomCombinator a b :> rest) where
+    parseEndpoint r a = parseEndpoint @rest r $ a <> [("CustomCombinator"
+                                                     , toDetails [ ("Param A", Detail $ typeText @a)
+                                                                 , ("Param B", Detail $ typeText @b)
+                                                                 ]
+                                                     )]
 
 --- Just to allow compilation
 main :: IO ()

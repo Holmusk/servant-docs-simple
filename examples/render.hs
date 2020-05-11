@@ -11,7 +11,7 @@ import Data.Map.Ordered (assocs)
 import Data.Text (Text)
 
 import Servant.API ((:>), Post, ReqBody)
-import Servant.Docs.Simple.Parse (parse)
+import Servant.Docs.Simple.Parse (parseApi)
 import Servant.Docs.Simple.Render (ApiDocs (..), Details (..), Renderable (..))
 
 -- Our API type
@@ -21,7 +21,7 @@ type Response = Post '[()] ()
 
 -- Intermediate documentation structure
 documentTree :: ApiDocs
-documentTree = parse @API
+documentTree = parseApi @API
 
 -- Our custom datatype which we would like to render to
 newtype Documented = Documented [Endpt] deriving Show -- A list of documentation for all endpoints
