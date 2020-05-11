@@ -10,9 +10,9 @@ import Data.Aeson (Value)
 import Data.Text (Text)
 
 import Servant.API ((:>), Post, ReqBody)
-import Servant.Docs.Simple (document, documentWith, stdoutJson, stdoutPlainText, writeDocsJson,
-                            writeDocsPlainText)
-import Servant.Docs.Simple.Render (Json (..), PlainText (..))
+import Servant.Docs.Simple (document, documentWith, stdoutJson, stdoutMarkdown, stdoutPlainText,
+                            writeDocsJson, writeDocsMarkdown, writeDocsPlainText)
+import Servant.Docs.Simple.Render (Json (..), Markdown (..), PlainText (..))
 
 -- Our API type
 type API = "hello" :> "world" :> Request :> Response
@@ -23,15 +23,23 @@ type Response = Post '[()] ()
 documentText :: Text
 documentText = getPlainText $ document @API
 
+-- Render API as Markdown documentation, using prettyprinter annotations
+documentMarkdown :: Text
+documentMarkdown = getMarkdown $ documentWith @API @Markdown
+
 -- Render API as Json documentation, represented using Data.Aeson
 documentJson :: Value
 documentJson = getJson $ documentWith @API @Json
 
+
 main :: IO ()
 main = do
-  stdoutPlainText @API               -- Writes documentation as PlainText to stdout
+  stdoutPlainText @API                    -- Writes documentation as PlainText to stdout
   putStrLn "\n"
-  stdoutJson @API                    -- Writes documentation as Json to stdout
+  stdoutMarkdown @API                     -- Writes documentation as Markdown to stdout
+  putStrLn "\n"
+  stdoutJson @API                         -- Writes documentation as Json to stdout
 
-  writeDocsJson @API "docsJson"           -- Writes to the file $PWD/docsJson
-  writeDocsPlainText @API "docsPlainText" -- Writes to the file $PWD/docsPlainText
+  writeDocsJson @API "docs.json"           -- Writes to the file $PWD/docs.json
+  writeDocsPlainText @API "docs"           -- Writes to the file $PWD/docs
+  writeDocsMarkdown @API "docs.md"         -- Writes to the file $PWD/docs.md

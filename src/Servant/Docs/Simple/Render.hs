@@ -72,6 +72,7 @@ module Servant.Docs.Simple.Render
        , Parameter
        , Route
        , Json (..)
+       , Markdown (..)
        , Pretty (..)
        , PlainText (..)
        ) where
@@ -81,7 +82,9 @@ import Data.HashMap.Strict (fromList)
 import Data.List (intersperse)
 import Data.Map.Ordered (OMap, assocs)
 import Data.Text (Text, pack)
-import Data.Text.Prettyprint.Doc (Doc, cat, line, nest, pretty, vcat, vsep)
+import Data.Text.Prettyprint.Doc (Doc, annotate, defaultLayoutOptions, indent, layoutPretty, line,
+                                  pretty, vcat, vsep)
+import Data.Text.Prettyprint.Doc.Render.Util.StackMachine (renderSimplyDecorated)
 
 -- | Intermediate documentation structure, a hashmap of endpoints
 --
@@ -169,23 +172,43 @@ instance ToJSON Details where
     toJSON (Details ls) = toJSON . fromList . assocs $ ls
 
 -- | Conversion to prettyprint
-newtype Pretty ann = Pretty { getPretty :: Doc ann }
+newtype Pretty = Pretty { getPretty :: Doc Ann }
+
+-- | Annotates our route and parameter keys
+data Ann = AnnRoute | AnnParam | AnnDetail
 
 -- | Conversion to prettyprint
-instance Renderable (Pretty ann) where
+instance Renderable Pretty where
     render = Pretty . prettyPrint
 
 -- | Helper function to prettyprint the ApiDocs
-prettyPrint :: ApiDocs -> Doc ann
-prettyPrint (ApiDocs endpoints) = vcat . intersperse line
-                                $ uncurry (toDoc 0) <$> assocs endpoints
+prettyPrint :: ApiDocs -> Doc Ann
+prettyPrint (ApiDocs endpoints) = vsep
+                                $ intersperse line
+                                $ documentRoute
+                              <$> assocs endpoints
 
--- | Helper function
-toDoc :: Int -> Text -> Details -> Doc ann
-toDoc i t d = case d of
-    Detail a   -> cat [pretty t, ": ", pretty a]
-    Details as -> nest i . vsep $ pretty t <> ":"
-                                : (uncurry (toDoc (i + 4)) <$> assocs as)
+-- | Documents an API route
+documentRoute :: (Route, Details) -- ^ Route-Details pair
+               -> Doc Ann -- ^ documentation for Route-Details pair
+documentRoute (r, d) = routeDoc <> ":" <> detailsDoc
+  where routeDoc = annotate AnnRoute $ pretty r
+        detailsDoc = documentDetails 0 d
+
+-- | Documents Details of an API route
+documentDetails :: Int -- ^ Indentation
+                -> Details -- ^ Details
+                -> Doc Ann -- ^ documentation for Details
+documentDetails i d = case d of
+    Detail d'  -> " " <> annotate AnnDetail (pretty d')
+    Details ds -> (line <>)
+                $ indent i
+                $ vcat
+                $ documentParameters <$> ds'
+      where ds' = assocs ds
+            documentParameters (param, details) = annotate AnnParam (pretty param)
+                                               <> ":"
+                                               <> documentDetails (i + 4) details
 
 -- | Conversion to plaintext
 newtype PlainText = PlainText { getPlainText :: Text } deriving stock (Eq, Show)
@@ -193,3 +216,20 @@ newtype PlainText = PlainText { getPlainText :: Text } deriving stock (Eq, Show)
 -- | Conversion to plaintext
 instance Renderable PlainText where
     render = PlainText . pack . show . getPretty . render
+
+-- | Conversion to markdown
+newtype Markdown = Markdown { getMarkdown :: Text } deriving stock (Eq, Show)
+
+instance Renderable Markdown where
+    render docs = Markdown m
+      where m = renderSimplyDecorated id annOpen annClose docStream
+            annOpen = \case
+              AnnRoute -> "### "
+              AnnParam -> "- **"
+              AnnDetail -> "`"
+            annClose = \case
+              AnnRoute -> ""
+              AnnParam -> "**"
+              AnnDetail -> "`"
+            docStream = layoutPretty defaultLayoutOptions docs'
+            docs' = getPretty $ render docs
