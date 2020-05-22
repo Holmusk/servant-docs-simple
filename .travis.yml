@@ -49,6 +49,7 @@ script:
     if [ -z "$STACK_YAML" ]; then
       cabal v2-test --enable-tests
     else
+      set -euo pipefail
       stack test --system-ghc
       stack examples/custom.hs
       stack examples/example.hs
