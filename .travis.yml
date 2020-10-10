@@ -20,13 +20,19 @@ matrix:
   - ghc: 8.8.2
     cabal: "3.0"
 
+  - ghc: 8.10.2
+    cabal: "3.0"
+
   # Stack
   - ghc: 8.6.5
     env: STACK_YAML="$TRAVIS_BUILD_DIR/stack-8.6.5.yaml"
     cabal: "2.4"
 
-  # Stack
   - ghc: 8.8.2
+    env: STACK_YAML="$TRAVIS_BUILD_DIR/stack-8.8.2.yaml"
+    cabal: "3.0"
+
+  - ghc: 8.8.4
     env: STACK_YAML="$TRAVIS_BUILD_DIR/stack.yaml"
     cabal: "3.0"
 
