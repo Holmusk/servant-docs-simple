@@ -1,6 +1,6 @@
 cabal-version:       2.4
 name:                servant-docs-simple
-version:             0.3.0.0
+version:             0.3.0.1
 synopsis:            Generate endpoints overview for Servant API
 
 description:
@@ -23,7 +23,8 @@ build-type:          Simple
 extra-doc-files:     README.md
                      CHANGELOG.md
 extra-source-files:  README.md
-tested-with:         GHC == 8.6.5
+tested-with:         GHC == 8.10.2
+                     GHC == 8.6.5
                      GHC == 8.8.2
 
 source-repository head
@@ -31,7 +32,7 @@ source-repository head
   location:            https://github.com/Holmusk/servant-docs-simple.git
 
 common common-options
-  build-depends:       base >= 4.11.1.0 && <= 4.15
+  build-depends:       base >= 4.11.1.0 && < 4.16
                      , aeson >= 1.4.2 && < 1.6
                      , aeson-pretty >= 0.8.7 && < 0.9
                      , bytestring  >= 0.10.8.2 && < 0.11
