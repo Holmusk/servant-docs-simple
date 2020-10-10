@@ -15,3 +15,15 @@
 ## 0.2.0.1
 
 * Update CHANGELOG, README
+
+## 0.3.0.0
+
+* Add markdown support
+
+* Update typeclass names in `Servant.Docs.Simple.Parse`:
+
+  `HasParsable` -> `HasParsableApi`
+  
+  `HasDocumentApi` -> `HasParsableEndpoint`
+  
+  `parse` -> `parseApi`
