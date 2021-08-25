@@ -19,7 +19,7 @@ __Example of parsing an API__
 > ApiDocs ( fromList [( "/hello/world",
 >                     , Details (fromList ([ ( "RequestBody"
 >                                            , Details (fromList ([ ( "Format"
->                                                                   , Detail "': * () ('[] *)"
+>                                                                   , Detail "[()]"
 >                                                                   )
 >                                                                 , ( "ContentType"
 >                                                                   , Detail "()"
@@ -31,7 +31,7 @@ __Example of parsing an API__
 >                                            )
 >                                          , ( "Response"
 >                                            , Details (fromList ([ ( "Format"
->                                                                   , Detail "': * () ('[] *)"
+>                                                                   , Detail "[()]"
 >                                                                   )
 >                                                                 , ( "ContentType"
 >                                                                   , Detail "()"
@@ -51,6 +51,7 @@ module Servant.Docs.Simple.Parse
        , symbolVal'
        , toDetails
        , typeText
+       , typeListText
        ) where
 
 
@@ -58,7 +59,7 @@ import Data.Foldable (fold)
 import Data.Map.Ordered (OMap, empty, fromList, (|<))
 import Data.Proxy
 import Data.Text (Text, pack)
-import Data.Typeable (Typeable, typeRep)
+import Data.Typeable (Typeable, typeRep, TypeRep, splitTyConApp, TyCon, tyConPackage, tyConModule, tyConName)
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 
 import Servant.API ((:>), AuthProtect, BasicAuth, Capture', CaptureAll, Description, EmptyAPI,
@@ -67,6 +68,7 @@ import Servant.API ((:>), AuthProtect, BasicAuth, Capture', CaptureAll, Descript
 import qualified Servant.API.TypeLevel as S (Endpoints)
 
 import Servant.Docs.Simple.Render (ApiDocs (..), Details (..), Parameter, Route)
+import Data.Kind (Type)
 
 -- | Flattens API into type level list of Endpoints
 class HasParsableApi api where
@@ -197,9 +199,9 @@ instance (HasParsableEndpoint b, KnownSymbol param, Typeable typ) => HasParsable
                                         )]
 
 -- | Request body documentation
-instance (HasParsableEndpoint b, Typeable ct, Typeable typ) => HasParsableEndpoint (ReqBody' m ct typ :> b) where
+instance (HasParsableEndpoint b, Typeable (ct :: [Type]), Typeable typ) => HasParsableEndpoint (ReqBody' m (ct :: [Type]) typ :> b) where
     parseEndpoint r a = parseEndpoint @b r $ a <> [( "RequestBody"
-                                        , toDetails [ ("Format", Detail $ typeText @ct)
+                                        , toDetails [ ("Format", Detail $ typeListText @ct)
                                                     , ("ContentType", Detail $ typeText @typ)
                                                     ]
                                         )]
@@ -215,13 +217,13 @@ instance (HasParsableEndpoint b, Typeable ct, Typeable typ) => HasParsableEndpoi
 -- | Response documentation
 --   Terminates here as responses are last parts of api endpoints
 --   Note that request type information (GET, POST etc...) is contained here
-instance (Typeable m, Typeable ct, Typeable typ) => HasParsableEndpoint (Verb m s ct typ) where
+instance (Typeable m, Typeable (ct :: [Type]), Typeable typ) => HasParsableEndpoint (Verb m s (ct :: [Type]) typ) where
     parseEndpoint r a = ( r
                    , fromList $ a <> [requestType, response]
                    )
         where requestType = ("RequestType", Detail $ typeText @m)
               response = ( "Response"
-                         , toDetails [ ("Format", Detail $ typeText @ct)
+                         , toDetails [ ("Format", Detail $ typeListText @ct)
                                      , ("ContentType", Detail $ typeText @typ)
                                      ]
                          )
@@ -231,8 +233,42 @@ toDetails :: [(Text, Details)] -> Details
 toDetails = Details . fromList
 
 -- | Convert types to Text
-typeText :: forall a. (Typeable a) => Text
+typeText :: forall a. Typeable a => Text
 typeText = pack . show . typeRep $ Proxy @a
+
+-- | Converts type-level list of types to Text.
+-- If the type variable doesn't correspond to type level list,
+-- the result is the same as calling 'typeText'.
+--
+-- >>> typeListText @'[JSON,PlainText]
+-- "[JSON,PlainText]"
+---
+-- This is nicer way to print type-level lists than using 'typeText',
+-- the output of which is difficult to read due to use of ticked list constructors.
+-- >>> typeText @'[JSON,PlainText]
+-- "': * JSON (': * PlainText ('[] *))"
+typeListText :: forall a. Typeable a => Text
+typeListText = case go . typeRep $ Proxy @a of
+    Nothing -> typeText @a
+    Just typeReps -> pack $ show typeReps
+  where
+    go :: TypeRep -> Maybe [TypeRep]
+    go typRep = case splitTyConApp typRep of
+        (tyCon, [x,xs]) | isCons tyCon -> (x:) <$> go xs
+        (tyCon, [])| isNil tyCon -> Just []
+        _ -> Nothing
+    
+    isCons :: TyCon -> Bool
+    isCons tc =
+        tyConPackage tc == "ghc-prim"
+        && tyConModule tc == "GHC.Types"
+        && tyConName tc == "':"
+
+    isNil :: TyCon -> Bool
+    isNil tc =
+        tyConPackage tc == "ghc-prim"
+        && tyConModule tc == "GHC.Types"
+        && tyConName tc == "'[]"
 
 -- | Convert symbol to Text
 symbolVal' :: forall n. KnownSymbol n => Text

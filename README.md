@@ -51,10 +51,10 @@ type Response = Post '[()] ()
 
 main :: IO ()
 main = do
-  -- Writes to the file $PWD/docsJson
+  -- Writes to the file $PWD/docs.json
   writeDocsJson @API "docs.json"
 
-  -- Writes to the file $PWD/docsPlainText
+  -- Writes to the file $PWD/docs.txt
   writeDocsPlainText @API "docs.txt"
 
 ```
@@ -75,12 +75,12 @@ docs.txt
 {
     "/hello/world": {
         "Response": {
-            "Format": "': * () ('[] *)",
+            "Format": "[()]",
             "ContentType": "()"
         },
         "RequestType": "'POST",
         "RequestBody": {
-            "Format": "': * () ('[] *)",
+            "Format": "[()]",
             "ContentType": "()"
         }
     }
@@ -92,11 +92,11 @@ docs.txt
 ``` text
 /hello/world:
 RequestBody:
-    Format: ': * () ('[] *)
+    Format: [()]
     ContentType: ()
 RequestType: 'POST
 Response:
-    Format: ': * () ('[] *)
+    Format: [()]
     ContentType: ()
 ```
 
@@ -138,7 +138,7 @@ stack examples/<source file>
     --                                           --- Format Types ---
     --                                          |                    |
     --                                          v                    v
-    type singleAPI = "hello" :> ReqBody '[JSON] User :> POST '[JSON] Message
+    type SingleAPI = "hello" :> ReqBody '[JSON] User :> POST '[JSON] Message
     data User = User Name Password deriving Typeable 
     data Messsage = Message Id Content deriving Typeable
 

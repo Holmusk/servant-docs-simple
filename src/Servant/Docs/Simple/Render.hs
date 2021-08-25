@@ -13,7 +13,7 @@ __Example of rendering the intermediate structure__
 > ApiDocs ( fromList [( "/hello/world",
 >                     , Details (fromList ([ ( "RequestBody"
 >                                            , Details (fromList ([ ( "Format"
->                                                                   , Detail "': * () ('[] *)"
+>                                                                   , Detail "[()]"
 >                                                                   )
 >                                                                 , ( "ContentType"
 >                                                                   , Detail "()"
@@ -25,7 +25,7 @@ __Example of rendering the intermediate structure__
 >                                            )
 >                                          , ( "Response"
 >                                            , Details (fromList ([ ( "Format"
->                                                                   , Detail "': * () ('[] *)"
+>                                                                   , Detail "[()]"
 >                                                                   )
 >                                                                 , ( "ContentType"
 >                                                                   , Detail "()"
@@ -41,12 +41,12 @@ __Example of rendering the intermediate structure__
 > {
 >     "/hello/world": {
 >         "Response": {
->             "Format": "': * () ('[] *)",
+>             "Format": "[()]",
 >             "ContentType": "()"
 >         },
 >         "RequestType": "'POST",
 >         "RequestBody": {
->             "Format": "': * () ('[] *)",
+>             "Format": "[()]",
 >             "ContentType": "()"
 >         }
 >     }
@@ -56,11 +56,11 @@ __Example of rendering the intermediate structure__
 
 > /hello/world:
 > RequestBody:
->     Format: ': * () ('[] *)
+>     Format: [()]
 >     ContentType: ()
 > RequestType: 'POST
 > Response:
->     Format: ': * () ('[] *)
+>     Format: [()]
 >     ContentType: ()
 
 -}
@@ -100,7 +100,7 @@ import Data.Text.Prettyprint.Doc.Render.Util.StackMachine (renderSimplyDecorated
 -- > ApiDocs ( fromList [ ( "/users/update",
 -- >                      , Details (fromList ([ ( "Response"
 -- >                                             , Details (fromList ([ ( "Format"
--- >                                                                    , Detail "': * () ('[] *)"
+-- >                                                                    , Detail "[()]"
 -- >                                                                    )
 -- >                                                                  , ( "ContentType"
 -- >                                                                    , Detail "()"
@@ -112,7 +112,7 @@ import Data.Text.Prettyprint.Doc.Render.Util.StackMachine (renderSimplyDecorated
 -- >                    , ( "/users/get",
 -- >                      , Details (fromList ([ ( "Response"
 -- >                                             , Details (fromList ([ ( "Format"
--- >                                                                    , Detail "': * () ('[] *)"
+-- >                                                                    , Detail "[()]"
 -- >                                                                    )
 -- >                                                                  , ( "ContentType"
 -- >                                                                    , Detail "()"
@@ -224,12 +224,12 @@ instance Renderable Markdown where
     render docs = Markdown m
       where m = renderSimplyDecorated id annOpen annClose docStream
             annOpen = \case
-              AnnRoute -> "### "
-              AnnParam -> "- **"
+              AnnRoute  -> "### "
+              AnnParam  -> "- **"
               AnnDetail -> "`"
             annClose = \case
-              AnnRoute -> ""
-              AnnParam -> "**"
+              AnnRoute  -> ""
+              AnnParam  -> "**"
               AnnDetail -> "`"
             docStream = layoutPretty defaultLayoutOptions docs'
             docs' = getPretty $ render docs

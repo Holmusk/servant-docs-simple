@@ -10,7 +10,7 @@ import Servant.Docs.Simple.Render (Json (..), PlainText (..), render)
 
 
 renderSpec :: Spec
-renderSpec = describe "Renders Details" $ do
+renderSpec = describe "render" $ do
     it "should render as JSON" $
         render @Json apiCompleteParsed `shouldBe` apiCompleteJson
     it "should render as PlainText" $
