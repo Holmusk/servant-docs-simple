@@ -82,9 +82,9 @@ import Data.HashMap.Strict (fromList)
 import Data.List (intersperse)
 import Data.Map.Ordered (OMap, assocs)
 import Data.Text (Text, pack)
-import Data.Text.Prettyprint.Doc (Doc, annotate, defaultLayoutOptions, indent, layoutPretty, line,
+import Prettyprinter (Doc, annotate, defaultLayoutOptions, indent, layoutPretty, line,
                                   pretty, vcat, vsep)
-import Data.Text.Prettyprint.Doc.Render.Util.StackMachine (renderSimplyDecorated)
+import Prettyprinter.Render.Util.StackMachine (renderSimplyDecorated)
 
 -- | Intermediate documentation structure, a hashmap of endpoints
 --
