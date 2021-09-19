@@ -35,15 +35,15 @@ type Information = Text
 
 -- Allow us to render the documentTree in our custom data type
 instance Renderable Documented where
-  render (ApiDocs a) = Documented a'
-    where a' = convert <$> assocs a
+  render (ApiDocs endpoints) = Documented endpoints'
+    where endpoints' = convert <$> endpoints
           convert (route, info) = Endpt route (getInfo info)
 
 -- Just mush everything together, just a proof of concept.
 -- Check out Renderable instances in Servant.Docs.Simple.Render for proper implementations
 getInfo :: Details -> Text
 getInfo (Detail t)  = t
-getInfo (Details d) = foldMap (\(t, rest) -> t <> getInfo rest) $ assocs d
+getInfo (Details ds) = foldMap (\(t, rest) -> t <> getInfo rest) ds
 
 -- Rendered data structure
 documented :: Documented

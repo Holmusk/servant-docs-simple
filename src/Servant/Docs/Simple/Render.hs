@@ -78,10 +78,8 @@ module Servant.Docs.Simple.Render
        , PlainText (..)
        ) where
 
-import Data.Aeson (ToJSON (..), Value (..))
-import Data.HashMap.Strict (fromList)
+import Data.Aeson (ToJSON (..), Value (..), (.=), object)
 import Data.List (intersperse)
-import Data.Map.Ordered (OMap, assocs)
 import Data.Text (Text, pack)
 #if MIN_VERSION_prettyprinter(1,7,0)
 import Prettyprinter (Doc, annotate, defaultLayoutOptions, indent, layoutPretty, line, pretty, vcat,
@@ -93,7 +91,7 @@ import Data.Text.Prettyprint.Doc (Doc, annotate, defaultLayoutOptions, indent, l
 import Data.Text.Prettyprint.Doc.Render.Util.StackMachine (renderSimplyDecorated)
 #endif
 
--- | Intermediate documentation structure, a hashmap of endpoints
+-- | Intermediate documentation structure, a tree of endpoints
 --
 -- API type:
 --
@@ -132,7 +130,7 @@ import Data.Text.Prettyprint.Doc.Render.Util.StackMachine (renderSimplyDecorated
 --
 -- For more examples reference [Test.Servant.Docs.Simple.Samples](https://github.com/Holmusk/servant-docs-simple/blob/master/test/Test/Servant/Docs/Simple/Samples.hs)
 --
-newtype ApiDocs = ApiDocs (OMap Route Details) deriving stock (Eq, Show)
+newtype ApiDocs = ApiDocs [(Route, Details)] deriving stock (Eq, Show)
 
 -- | Route representation
 type Route = Text
@@ -151,7 +149,7 @@ type Route = Text
 --
 -- Can be interpreted as a Parameter (Response) and /Details/ (Format (...), ContentType (...))
 --
-data Details = Details (OMap Parameter Details) -- ^ OMap of Parameter-Details
+data Details = Details [(Parameter, Details)]
              | Detail Text    -- ^ Single Value
              deriving stock (Eq, Show)
 
@@ -169,14 +167,13 @@ newtype Json = Json { getJson :: Value } deriving stock (Eq, Show)
 instance Renderable Json where
     render = Json . toJSON
 
--- | Json instance for the endpoints hashmap
 instance ToJSON ApiDocs where
-    toJSON (ApiDocs endpoints) = toJSON . fromList . assocs $ endpoints
+    toJSON (ApiDocs endpoints) =
+        object $ fmap (\(route, details) -> route .= toJSON details) endpoints
 
--- | Json instance for the parameter hashmap of each endpoint
 instance ToJSON Details where
     toJSON (Detail t)   = String t
-    toJSON (Details ls) = toJSON . fromList . assocs $ ls
+    toJSON (Details ds) = object $ fmap (\(param, details) -> param .= toJSON details) ds
 
 -- | Conversion to prettyprint
 newtype Pretty = Pretty { getPretty :: Doc Ann }
@@ -193,7 +190,7 @@ prettyPrint :: ApiDocs -> Doc Ann
 prettyPrint (ApiDocs endpoints) = vsep
                                 $ intersperse line
                                 $ documentRoute
-                              <$> assocs endpoints
+                              <$> endpoints
 
 -- | Documents an API route
 documentRoute :: (Route, Details) -- ^ Route-Details pair
@@ -211,9 +208,8 @@ documentDetails i d = case d of
     Details ds -> (line <>)
                 $ indent i
                 $ vcat
-                $ documentParameters <$> ds'
-      where ds' = assocs ds
-            documentParameters (param, details) = annotate AnnParam (pretty param)
+                $ documentParameters <$> ds
+      where documentParameters (param, details) = annotate AnnParam (pretty param)
                                                <> ":"
                                                <> documentDetails (i + 4) details
 
