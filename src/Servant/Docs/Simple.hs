@@ -24,10 +24,10 @@ __Example script__
 >
 > main :: IO ()
 > main = do
->   -- Writes to the file $PWD/docsJson
+>   -- Writes to the file $PWD/docs.json
 >   writeDocsJson @API "docs.json"
 >
->   -- Writes to the file $PWD/docsPlainText
+>   -- Writes to the file $PWD/docs.txt
 >   writeDocsPlainText @API "docs.txt"
 
 __Expected Output__
@@ -43,12 +43,12 @@ __Expected Output__
 > {
 >     "/hello/world": {
 >         "Response": {
->             "Format": "': * () ('[] *)",
+>             "Format": "[()]",
 >             "ContentType": "()"
 >         },
 >         "RequestType": "'POST",
 >         "RequestBody": {
->             "Format": "': * () ('[] *)",
+>             "Format": "[()]",
 >             "ContentType": "()"
 >         }
 >     }
@@ -58,11 +58,11 @@ __Expected Output__
 
 > /hello/world:
 > RequestBody:
->     Format: ': * () ('[] *)
+>     Format: [()]
 >     ContentType: ()
 > RequestType: 'POST
 > Response:
->     Format: ': * () ('[] *)
+>     Format: [()]
 >     ContentType: ()
 
 -}

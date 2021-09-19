@@ -6,9 +6,9 @@ module Test.Servant.Docs.Simple.Samples (ApiComplete, ApiMultiple, apiCompletePl
 
 import Data.Aeson (Value (String), object)
 import Data.Map.Ordered (fromList, singleton)
-import Servant.API ((:<|>), (:>), AuthProtect, BasicAuth, Capture, CaptureAll, Description, Header,
-                    HttpVersion, IsSecure, Post, QueryFlag, QueryParam, QueryParams, RemoteHost,
-                    ReqBody, StreamBody, Summary, Vault)
+import Servant.API (AuthProtect, BasicAuth, Capture, CaptureAll, Description, Header, HttpVersion,
+                    IsSecure, Post, QueryFlag, QueryParam, QueryParams, RemoteHost, ReqBody,
+                    StreamBody, Summary, Vault, (:<|>), (:>))
 
 import Text.RawString.QQ (r)
 
@@ -45,7 +45,7 @@ apiCompleteJson = Json (object [ ( "/test_route/{test::()}/{test::()}"
                                           , ( "Authentication", String "TEST_JWT")
 
                                           , ( "Response"
-                                            , object [ ( "Format", String "': * () ('[] *)")
+                                            , object [ ( "Format", String "[()]")
                                                      , ( "ContentType",String "()")
                                                      ])
 
@@ -72,7 +72,7 @@ apiCompleteJson = Json (object [ ( "/test_route/{test::()}/{test::()}"
                                           , ( "QueryFlag", object [( "Param",String "test")])
 
                                           , ( "RequestBody"
-                                            , object [ ( "Format", String "': * () ('[] *)")
+                                            , object [ ( "Format", String "[()]")
                                                      , ( "ContentType",String "()")
                                                      ])
 
@@ -102,14 +102,14 @@ QueryParams:
     Param: test
     ContentType: ()
 RequestBody:
-    Format: ': * () ('[] *)
+    Format: [()]
     ContentType: ()
 StreamBody:
     Format: ()
     ContentType: ()
 RequestType: 'POST
 Response:
-    Format: ': * () ('[] *)
+    Format: [()]
     ContentType: ()|]
 
 type ApiMultiple = "route1" :> DynRouteTest :> CaptureAllTest :> ApiDetails
@@ -166,7 +166,7 @@ apiDetails = toDetails [ ("Captures Http Version", Detail "True")
                                                             , ("ContentType", Detail "()")
                                                             ])
 
-                                , ("RequestBody", toDetails [ ("Format", Detail "': * () ('[] *)")
+                                , ("RequestBody", toDetails [ ("Format", Detail "[()]")
                                                             , ("ContentType", Detail "()")
                                                             ])
 
@@ -176,7 +176,7 @@ apiDetails = toDetails [ ("Captures Http Version", Detail "True")
 
                                 , ("RequestType", Detail "'POST")
 
-                                , ("Response", toDetails [ ("Format", Detail "': * () ('[] *)")
+                                , ("Response", toDetails [ ("Format", Detail "[()]")
                                                          , ("ContentType", Detail "()")
                                                          ])
                                 ]

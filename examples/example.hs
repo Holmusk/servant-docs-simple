@@ -16,8 +16,8 @@ type Response = Post '[()] ()
 
 main :: IO ()
 main = do
-  -- Writes to the file $PWD/docsJson
+  -- Writes to the file $PWD/docs.json
   writeDocsJson @API "docs.json"
 
-  -- Writes to the file $PWD/docsPlainText
+  -- Writes to the file $PWD/docs.txt
   writeDocsPlainText @API "docs.txt"
