@@ -33,7 +33,7 @@ the API to generate the documentation.
 **Using this script**
 
 ``` haskell
--- stack --system-ghc runghc --package servant-docs-simple
+-- stack runghc --package servant-docs-simple
 {-# LANGUAGE DataKinds        #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators    #-}

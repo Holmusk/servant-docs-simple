@@ -1,4 +1,4 @@
--- stack --system-ghc runghc --package servant-docs-simple
+-- stack runghc --package servant-docs-simple
 -- You may reference Renderable instances in Servant.Docs.Simple.Render for more examples
 
 {-# LANGUAGE DataKinds        #-}
