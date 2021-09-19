@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {- | Renders the intermediate structure into common documentation formats
 
 __Example scripts__
@@ -82,9 +83,15 @@ import Data.HashMap.Strict (fromList)
 import Data.List (intersperse)
 import Data.Map.Ordered (OMap, assocs)
 import Data.Text (Text, pack)
-import Prettyprinter (Doc, annotate, defaultLayoutOptions, indent, layoutPretty, line,
-                                  pretty, vcat, vsep)
+#if MIN_VERSION_prettyprinter(1,7,0)
+import Prettyprinter (Doc, annotate, defaultLayoutOptions, indent, layoutPretty, line, pretty, vcat,
+                      vsep)
 import Prettyprinter.Render.Util.StackMachine (renderSimplyDecorated)
+#else
+import Data.Text.Prettyprint.Doc (Doc, annotate, defaultLayoutOptions, indent, layoutPretty, line,
+                                  pretty, vcat, vsep)
+import Data.Text.Prettyprint.Doc.Render.Util.StackMachine (renderSimplyDecorated)
+#endif
 
 -- | Intermediate documentation structure, a hashmap of endpoints
 --

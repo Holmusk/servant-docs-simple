@@ -69,7 +69,7 @@ jobs:
     strategy:
       matrix:
         stack: ["2.7.3"]
-        ghc: ["8.10.7"]
+        resolver: ["lts-16.31", "lts-18.10"]
 
     steps:
     - uses: actions/checkout@v2
@@ -78,26 +78,25 @@ jobs:
     - uses: haskell/actions/setup@v1
       name: Setup Haskell Stack
       with:
-        ghc-version: ${{ matrix.ghc }}
         stack-version: ${{ matrix.stack }}
 
     - uses: actions/cache@v2.1.6
       name: Cache ~/.stack
       with:
         path: ~/.stack
-        key: ${{ runner.os }}-${{ matrix.ghc }}-stack
+        key: ${{ runner.os }}-stack
 
     - name: Install dependencies
       run: |
-        stack build --test --bench --no-run-tests --no-run-benchmarks --only-dependencies
+        stack build --resolver=${{ matrix.resolver }} --test --bench --no-run-tests --no-run-benchmarks --only-dependencies
 
     - name: Build
       run: |
-        stack build --test --bench --no-run-tests --no-run-benchmarks
+        stack build --resolver=${{ matrix.resolver }} --test --bench --no-run-tests --no-run-benchmarks
 
     - name: Test
       run: |
-        stack test
+        stack test --resolver=${{ matrix.resolver }}
     - name: Run examples
       run: |
         stack examples/custom.hs
