@@ -86,17 +86,22 @@ jobs:
         path: ~/.stack
         key: ${{ runner.os }}-${{ matrix.resolver }}-stack
 
+    - name: configure stack
+      run: |
+        echo 'resolver: ${{ matrix.resolver }}' > stack.yaml
+
     - name: Install dependencies
       run: |
-        stack build --resolver=${{ matrix.resolver }} --test --bench --no-run-tests --no-run-benchmarks --only-dependencies
+        stack build --test --bench --no-run-tests --no-run-benchmarks --only-dependencies
 
     - name: Build
       run: |
-        stack build --resolver=${{ matrix.resolver }} --test --bench --no-run-tests --no-run-benchmarks
+        stack build --test --bench --no-run-tests --no-run-benchmarks
 
     - name: Test
       run: |
-        stack test --resolver=${{ matrix.resolver }}
+        stack test
+
     - name: Run examples
       run: |
         stack examples/custom.hs
