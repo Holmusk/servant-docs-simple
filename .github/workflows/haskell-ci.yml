@@ -64,7 +64,7 @@ jobs:
         cabal test all
 
   stack:
-    name: stack / ghc ${{ matrix.ghc }}
+    name: stack / resolver ${{ matrix.resolver }} 
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -84,7 +84,7 @@ jobs:
       name: Cache ~/.stack
       with:
         path: ~/.stack
-        key: ${{ runner.os }}-stack
+        key: ${{ runner.os }}-${{ matrix.resolver }}-stack
 
     - name: Install dependencies
       run: |
