@@ -154,8 +154,8 @@ instance HasParsableEndpoint b => HasParsableEndpoint (Vault :> b) where
 instance (HasParsableEndpoint b, KnownSymbol realm, Typeable a) => HasParsableEndpoint (BasicAuth (realm :: Symbol) a :> b) where
     parseEndpoint r a = parseEndpoint @b r $ a <> [( "Basic Authentication"
                                         , Details [ ("Realm", Detail realm)
-                                                    , ("UserData", Detail userData)
-                                                    ]
+                                                  , ("UserData", Detail userData)
+                                                  ]
                                         )]
 
         where realm = symbolVal' @realm
@@ -170,8 +170,8 @@ instance (HasParsableEndpoint b, KnownSymbol token) => HasParsableEndpoint (Auth
 instance (HasParsableEndpoint b, KnownSymbol ct, Typeable typ) => HasParsableEndpoint (Header' m (ct :: Symbol) typ :> b) where
     parseEndpoint r a = parseEndpoint @b r $ a <> [( "RequestHeaders"
                                         , Details [ ("Name", Detail $ symbolVal' @ct)
-                                                    , ("ContentType", Detail $ typeText @typ)
-                                                    ]
+                                                  , ("ContentType", Detail $ typeText @typ)
+                                                  ]
                                         )]
 
 -- | Query flag documentation
@@ -184,32 +184,32 @@ instance (HasParsableEndpoint b, KnownSymbol param) => HasParsableEndpoint (Quer
 instance (HasParsableEndpoint b, KnownSymbol param, Typeable typ) => HasParsableEndpoint (QueryParam' m (param :: Symbol) typ :> b) where
     parseEndpoint r a = parseEndpoint @b r $ a <> [( "QueryParam"
                                         , Details [ ("Param", Detail $ symbolVal' @param)
-                                                    , ("ContentType", Detail $ typeText @typ)
-                                                    ]
+                                                  , ("ContentType", Detail $ typeText @typ)
+                                                  ]
                                         )]
 
 -- | Query params documentation
 instance (HasParsableEndpoint b, KnownSymbol param, Typeable typ) => HasParsableEndpoint (QueryParams (param :: Symbol) typ :> b) where
     parseEndpoint r a = parseEndpoint @b r $ a <> [(  "QueryParams"
                                         , Details [ ("Param", Detail $ symbolVal' @param)
-                                                    , ("ContentType", Detail $ typeText @typ)
-                                                    ]
+                                                  , ("ContentType", Detail $ typeText @typ)
+                                                  ]
                                         )]
 
 -- | Request body documentation
 instance (HasParsableEndpoint b, Typeable (ct :: [Type]), Typeable typ) => HasParsableEndpoint (ReqBody' m (ct :: [Type]) typ :> b) where
     parseEndpoint r a = parseEndpoint @b r $ a <> [( "RequestBody"
                                         , Details [ ("Format", Detail $ typeListText @ct)
-                                                    , ("ContentType", Detail $ typeText @typ)
-                                                    ]
+                                                  , ("ContentType", Detail $ typeText @typ)
+                                                  ]
                                         )]
 
 -- | Stream body documentation
 instance (HasParsableEndpoint b, Typeable ct, Typeable typ) => HasParsableEndpoint (StreamBody' m ct typ :> b) where
     parseEndpoint r a = parseEndpoint @b r $ a <> [( "StreamBody"
                                         , Details [ ("Format", Detail $ typeText @ct)
-                                                    , ("ContentType", Detail $ typeText @typ)
-                                                    ]
+                                                  , ("ContentType", Detail $ typeText @typ)
+                                                  ]
                                         )]
 
 -- | Response documentation
@@ -220,8 +220,8 @@ instance (Typeable m, Typeable (ct :: [Type]), Typeable typ) => HasParsableEndpo
         where requestType = ("RequestType", Detail $ typeText @m)
               response = ( "Response"
                          , Details [ ("Format", Detail $ typeListText @ct)
-                                     , ("ContentType", Detail $ typeText @typ)
-                                     ]
+                                   , ("ContentType", Detail $ typeText @typ)
+                                   ]
                          )
 
 
