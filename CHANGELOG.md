@@ -27,3 +27,13 @@
   `HasDocumentApi` -> `HasParsableEndpoint`
   
   `parse` -> `parseApi`
+
+## 0.4.0.0
+
+* Improve how type-level lists are rendered.
+    Instead of "Format: ': * JSON ('[] *)"
+    you'll get "Format: [JSON]"
+
+* Fix bug when any given API combinator would only be rendered once per endpoint
+
+* API change: removed `toDetails` function. Use `Details` constructor directly instead.

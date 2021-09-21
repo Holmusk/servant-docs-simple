@@ -1,6 +1,6 @@
 # servant-docs-simple
 
-[![Build status](https://img.shields.io/travis/holmusk/servant-docs-simple.svg?logo=travis?branch=master)](https://travis-ci.org/holmusk/servant-docs-simple)
+[![Build status](https://github.com/holmusk/servant-docs-simple/workflows/CI/badge.svg)](https://github.com/holmusk/servant-docs-simple/actions)
 [![Hackage](https://img.shields.io/hackage/v/servant-docs-simple.svg?logo=haskell)](https://hackage.haskell.org/package/servant-docs-simple)
 [![Stackage Lts](http://stackage.org/package/servant-docs-simple/badge/lts)](http://stackage.org/lts/package/servant-docs-simple)
 [![Stackage Nightly](http://stackage.org/package/servant-docs-simple/badge/nightly)](http://stackage.org/nightly/package/servant-docs-simple)

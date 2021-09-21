@@ -49,14 +49,12 @@ module Servant.Docs.Simple.Parse
        ( HasParsableEndpoint (..)
        , HasParsableApi (..)
        , symbolVal'
-       , toDetails
        , typeText
        , typeListText
        ) where
 
 
 import Data.Foldable (fold)
-import Data.Map.Ordered (OMap, empty, fromList, (|<))
 import Data.Proxy
 import Data.Text (Text, pack)
 import Data.Typeable (Typeable, typeRep, TypeRep, splitTyConApp, TyCon, tyConPackage, tyConModule, tyConName)
@@ -89,15 +87,15 @@ class HasCollatable api where
 
 -- | Collapse a type-level list of API endpoints into documentation
 instance (HasParsableEndpoint e, HasCollatable b) => HasCollatable (e ': b) where
-    collate = ApiDocs $ (Details <$> documentEndpoint @e) |< previous
+    collate = ApiDocs $ (Details <$> documentEndpoint @e) : previous
       where ApiDocs previous = collate @b
 
 -- | Terminal step when there are no more endpoints left to recurse over
 instance HasCollatable '[] where
-    collate = ApiDocs empty
+    collate = ApiDocs []
 
 -- | Folds an api endpoint into documentation
-documentEndpoint :: forall a. HasParsableEndpoint a => (Route, OMap Parameter Details)
+documentEndpoint :: forall a. HasParsableEndpoint a => (Route, [(Parameter, Details)])
 documentEndpoint = parseEndpoint @a "" []
 
 -- | Folds an api endpoint into documentation
@@ -106,7 +104,7 @@ class HasParsableEndpoint e where
     -- | We use this to destructure the API type and convert it into documentation
     parseEndpoint :: Route -- ^ Route documentation
                   -> [(Parameter, Details)] -- ^ Everything else documentation
-                  -> (Route, OMap Parameter Details) -- ^ Generated documentation for the route
+                  -> (Route, [(Parameter, Details)]) -- ^ Generated documentation for the route
 
 -- | Static route documentation
 instance (HasParsableEndpoint b, KnownSymbol route) => HasParsableEndpoint ((route :: Symbol) :> b) where
@@ -155,9 +153,9 @@ instance HasParsableEndpoint b => HasParsableEndpoint (Vault :> b) where
 -- | Basic authentication documentation
 instance (HasParsableEndpoint b, KnownSymbol realm, Typeable a) => HasParsableEndpoint (BasicAuth (realm :: Symbol) a :> b) where
     parseEndpoint r a = parseEndpoint @b r $ a <> [( "Basic Authentication"
-                                        , toDetails [ ("Realm", Detail realm)
-                                                    , ("UserData", Detail userData)
-                                                    ]
+                                        , Details [ ("Realm", Detail realm)
+                                                  , ("UserData", Detail userData)
+                                                  ]
                                         )]
 
         where realm = symbolVal' @realm
@@ -171,66 +169,61 @@ instance (HasParsableEndpoint b, KnownSymbol token) => HasParsableEndpoint (Auth
 -- | Request header documentation
 instance (HasParsableEndpoint b, KnownSymbol ct, Typeable typ) => HasParsableEndpoint (Header' m (ct :: Symbol) typ :> b) where
     parseEndpoint r a = parseEndpoint @b r $ a <> [( "RequestHeaders"
-                                        , toDetails [ ("Name", Detail $ symbolVal' @ct)
-                                                    , ("ContentType", Detail $ typeText @typ)
-                                                    ]
+                                        , Details [ ("Name", Detail $ symbolVal' @ct)
+                                                  , ("ContentType", Detail $ typeText @typ)
+                                                  ]
                                         )]
 
 -- | Query flag documentation
 instance (HasParsableEndpoint b, KnownSymbol param) => HasParsableEndpoint (QueryFlag (param :: Symbol) :> b) where
     parseEndpoint r a = parseEndpoint @b r $ a <> [( "QueryFlag"
-                                        , toDetails [ ("Param", Detail $ symbolVal' @param) ]
+                                        , Details [ ("Param", Detail $ symbolVal' @param) ]
                                         )]
 
 -- | Query param documentation
 instance (HasParsableEndpoint b, KnownSymbol param, Typeable typ) => HasParsableEndpoint (QueryParam' m (param :: Symbol) typ :> b) where
     parseEndpoint r a = parseEndpoint @b r $ a <> [( "QueryParam"
-                                        , toDetails [ ("Param", Detail $ symbolVal' @param)
-                                                    , ("ContentType", Detail $ typeText @typ)
-                                                    ]
+                                        , Details [ ("Param", Detail $ symbolVal' @param)
+                                                  , ("ContentType", Detail $ typeText @typ)
+                                                  ]
                                         )]
 
 -- | Query params documentation
 instance (HasParsableEndpoint b, KnownSymbol param, Typeable typ) => HasParsableEndpoint (QueryParams (param :: Symbol) typ :> b) where
     parseEndpoint r a = parseEndpoint @b r $ a <> [(  "QueryParams"
-                                        , toDetails [ ("Param", Detail $ symbolVal' @param)
-                                                    , ("ContentType", Detail $ typeText @typ)
-                                                    ]
+                                        , Details [ ("Param", Detail $ symbolVal' @param)
+                                                  , ("ContentType", Detail $ typeText @typ)
+                                                  ]
                                         )]
 
 -- | Request body documentation
 instance (HasParsableEndpoint b, Typeable (ct :: [Type]), Typeable typ) => HasParsableEndpoint (ReqBody' m (ct :: [Type]) typ :> b) where
     parseEndpoint r a = parseEndpoint @b r $ a <> [( "RequestBody"
-                                        , toDetails [ ("Format", Detail $ typeListText @ct)
-                                                    , ("ContentType", Detail $ typeText @typ)
-                                                    ]
+                                        , Details [ ("Format", Detail $ typeListText @ct)
+                                                  , ("ContentType", Detail $ typeText @typ)
+                                                  ]
                                         )]
 
 -- | Stream body documentation
 instance (HasParsableEndpoint b, Typeable ct, Typeable typ) => HasParsableEndpoint (StreamBody' m ct typ :> b) where
     parseEndpoint r a = parseEndpoint @b r $ a <> [( "StreamBody"
-                                        , toDetails [ ("Format", Detail $ typeText @ct)
-                                                    , ("ContentType", Detail $ typeText @typ)
-                                                    ]
+                                        , Details [ ("Format", Detail $ typeText @ct)
+                                                  , ("ContentType", Detail $ typeText @typ)
+                                                  ]
                                         )]
 
 -- | Response documentation
 --   Terminates here as responses are last parts of api endpoints
 --   Note that request type information (GET, POST etc...) is contained here
 instance (Typeable m, Typeable (ct :: [Type]), Typeable typ) => HasParsableEndpoint (Verb m s (ct :: [Type]) typ) where
-    parseEndpoint r a = ( r
-                   , fromList $ a <> [requestType, response]
-                   )
+    parseEndpoint r a = (r,  a <> [requestType, response])
         where requestType = ("RequestType", Detail $ typeText @m)
               response = ( "Response"
-                         , toDetails [ ("Format", Detail $ typeListText @ct)
-                                     , ("ContentType", Detail $ typeText @typ)
-                                     ]
+                         , Details [ ("Format", Detail $ typeListText @ct)
+                                   , ("ContentType", Detail $ typeText @typ)
+                                   ]
                          )
 
--- | Convert parameter-value pairs to Details type
-toDetails :: [(Text, Details)] -> Details
-toDetails = Details . fromList
 
 -- | Convert types to Text
 typeText :: forall a. Typeable a => Text
