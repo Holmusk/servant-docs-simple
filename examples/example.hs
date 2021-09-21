@@ -4,7 +4,7 @@
 {-# LANGUAGE TypeOperators    #-}
 
 
-module Main where
+odule Main where
 
 import Servant.API ((:>), Post, ReqBody)
 import Servant.Docs.Simple (writeDocsJson, writeDocsPlainText)
